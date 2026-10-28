@@ -1,0 +1,2511 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="contact-email" content="leung200303@gmail.com">
+<meta name="beta-version" content="v0.3">
+<title>景品情報索引 — 日本夾機景品・一番くじ（Beta 示範版）</title>
+<meta name="description" content="日本夾機景品／一番くじ情報索引（Beta 示範版）。搜尋、多維篩選、瀏覽熱度榜、本地收藏。非官方、示範數據、不構成入貨建議。">
+<style>
+/* 景品情報索引 — 日系簡潔風：白底、細線、低飽和、資訊密度高 */
+:root{
+  --ink:#1d1d1f; --ink2:#4a4a4f; --muted:#8a8a90;
+  --line:#e6e4e0; --line2:#d6d3cd; --bg:#faf9f7; --panel:#ffffff;
+  --accent:#b03a2e; --accent-weak:#f6e9e7;
+  --ok:#2f6f4e; --warn:#a8792b;
+  --radius:6px;
+  --font: "Hiragino Sans","Noto Sans JP","Yu Gothic UI",-apple-system,"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font); color:var(--ink); background:var(--bg);
+  font-size:13px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0; font-weight:600; letter-spacing:.01em}
+button{font-family:inherit; font-size:inherit; cursor:pointer}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; background:#f1efec; padding:1px 4px; border-radius:3px}
+.muted{color:var(--muted)}
+.hidden{display:none !important}
+
+/* ---------- header ---------- */
+.site{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+  padding:18px 28px 14px; background:var(--panel); border-bottom:1px solid var(--line);
+}
+.brand h1{font-size:19px; display:flex; align-items:center; gap:8px}
+.badge-demo{
+  font-size:10px; font-weight:600; letter-spacing:.08em; color:#fff;
+  background:var(--accent); padding:2px 6px; border-radius:3px;
+}
+.brand .sub{margin:2px 0 0; color:var(--muted); font-size:11.5px}
+.viewtoggle{display:flex; border:1px solid var(--line2); border-radius:var(--radius); overflow:hidden; background:#fff}
+.viewtoggle button{
+  border:0; background:transparent; padding:7px 14px; color:var(--ink2); font-size:12px;
+}
+.viewtoggle button+button{border-left:1px solid var(--line2)}
+.viewtoggle button.active{background:var(--ink); color:#fff}
+
+/* ---------- notice / tabs ---------- */
+.notice{
+  margin:12px 28px 0; padding:9px 12px; font-size:11.5px; color:#6a5b46;
+  background:#fdf8f0; border:1px solid #eee2cd; border-radius:var(--radius);
+}
+.notice u{text-underline-offset:2px}
+.tabs{display:flex; gap:4px; padding:14px 28px 0; flex-wrap:wrap}
+.tabs button{
+  border:1px solid transparent; background:transparent; color:var(--ink2);
+  padding:7px 13px; border-radius:var(--radius) var(--radius) 0 0; font-size:12.5px;
+}
+.tabs button:hover{background:#f2f0ec}
+.tabs button.active{
+  background:var(--panel); border-color:var(--line); border-bottom-color:var(--panel);
+  color:var(--ink); font-weight:600; position:relative; top:1px;
+}
+.count{display:inline-block; min-width:16px; padding:0 4px; margin-left:4px;
+  background:var(--accent-weak); color:var(--accent); border-radius:8px; font-size:10.5px}
+
+/* ---------- layout ---------- */
+.layout{
+  display:grid; grid-template-columns:222px minmax(0,1fr) 286px;
+  gap:0; padding:0 28px 36px; align-items:start;
+}
+.filters,.results,.sidebar{background:var(--panel); border:1px solid var(--line)}
+.filters{border-radius:0 0 0 var(--radius); padding:14px 14px 18px; font-size:12px}
+.results{border-left:0; border-right:0; padding:16px 18px 22px; min-height:70vh}
+.sidebar{border-radius:0 0 var(--radius) 0; padding:14px 14px 18px}
+
+/* ---------- filters ---------- */
+.fgroup{margin-bottom:14px}
+.fgroup h3{
+  font-size:11px; color:var(--muted); text-transform:none; letter-spacing:.04em;
+  margin:0 0 6px; display:flex; justify-content:space-between; align-items:center;
+}
+.fgroup h3 .clr{color:var(--accent); font-size:10.5px; border:0; background:none; padding:0}
+.fopt{display:flex; align-items:center; gap:6px; padding:2px 0; color:var(--ink2)}
+.fopt input{accent-color:var(--accent); margin:0}
+.fopt label{cursor:pointer; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.fopt .n{color:var(--muted); font-size:10.5px}
+.fmore{border:0; background:none; color:var(--accent); font-size:10.5px; padding:2px 0}
+.filter-foot{margin-top:6px; border-top:1px solid var(--line); padding-top:10px}
+.filter-foot button{
+  width:100%; border:1px solid var(--line2); background:#fff; border-radius:var(--radius);
+  padding:6px; color:var(--ink2); font-size:11.5px;
+}
+
+/* ---------- search ---------- */
+.searchbar{display:flex; gap:8px; margin-bottom:12px}
+.searchbar input{
+  flex:1; border:1px solid var(--line2); border-radius:var(--radius);
+  padding:9px 12px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink);
+}
+.searchbar input:focus{outline:2px solid #cfd8e3; outline-offset:-1px; border-color:#b9c4d1}
+.searchbar button{
+  border:1px solid var(--line2); background:#fff; border-radius:var(--radius);
+  width:36px; color:var(--muted);
+}
+.result-head{display:flex; justify-content:space-between; align-items:center;
+  padding-bottom:10px; border-bottom:1px solid var(--line); margin-bottom:12px; font-size:12px}
+.sortwrap{color:var(--muted); font-size:11.5px}
+.sortwrap select{border:1px solid var(--line2); border-radius:4px; padding:3px 6px;
+  font-family:inherit; font-size:11.5px; background:#fff; color:var(--ink2); margin-left:4px}
+
+/* ---------- cards ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px}
+.card{
+  border:1px solid var(--line); border-radius:var(--radius); padding:11px 12px 10px;
+  background:#fff; display:flex; flex-direction:column; gap:7px; position:relative;
+}
+.card:hover{border-color:var(--line2); box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card.dim{opacity:.55}
+.card-top{display:flex; justify-content:space-between; gap:8px; align-items:flex-start}
+.card-title{font-size:12.5px; font-weight:600; line-height:1.45; margin:0; word-break:break-word}
+.card-title mark{background:#fff2a8; color:inherit; padding:0 1px}
+.chips{display:flex; flex-wrap:wrap; gap:4px}
+.chip{
+  font-size:10px; padding:1px 6px; border-radius:10px; border:1px solid var(--line);
+  color:var(--ink2); background:#faf9f7; white-space:nowrap;
+}
+.chip.maker{border-color:#dcd6ce; background:#f6f2ea}
+.chip.ip{border-color:#dbe3ea; background:#f1f6fa; color:#33566e}
+.chip.brand{border-color:#e2ded6}
+.chip.kuji{border-color:#e8d2cd; background:#fbf1ef; color:#8d3b30}
+.chip.demo{border-color:#e6dcc6; background:#fdf8ea; color:#8a6a24}
+.chip.real{border-color:#d3e3d8; background:#f0f7f2; color:#2f6f4e}
+.card-meta{display:flex; flex-wrap:wrap; gap:10px; font-size:11px; color:var(--muted)}
+.card-meta b{font-weight:600; color:var(--ink2)}
+.price{
+  display:flex; gap:12px; align-items:baseline; padding:6px 8px; background:#fbfaf8;
+  border:1px solid var(--line); border-radius:4px; font-size:11px;
+}
+.price .k{color:var(--muted); font-size:10px}
+.price .v{font-weight:600; font-variant-numeric:tabular-nums}
+.price .stale{color:var(--warn); font-size:10px}
+.card-foot{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto}
+.links{display:flex; gap:6px; flex-wrap:wrap}
+.links a{
+  font-size:10.5px; color:var(--ink2); text-decoration:none; border:1px solid var(--line);
+  border-radius:4px; padding:2px 6px; background:#fff;
+}
+.links a:hover{border-color:var(--line2); background:#faf9f7}
+.fav{
+  border:0; background:none; font-size:15px; line-height:1; color:#c9c5bf; padding:2px 4px;
+}
+.fav.on{color:var(--accent)}
+.views{font-size:10.5px; color:var(--muted); white-space:nowrap}
+.views b{color:var(--ink2); font-variant-numeric:tabular-nums}
+
+/* ---------- sidebar ---------- */
+.panel{margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--line)}
+.panel:last-child{border-bottom:0; margin-bottom:0; padding-bottom:0}
+.panel h2{font-size:12px; margin-bottom:2px}
+.panel-note{font-size:10.5px; color:var(--warn); margin:0 0 8px}
+.rank{margin:0; padding-left:18px; font-size:11.5px}
+.rank li{margin-bottom:5px; color:var(--ink2); line-height:1.4}
+.rank li .t{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.rank li .m{color:var(--muted); font-size:10.5px}
+.rank button{border:0; background:none; padding:0; text-align:left; color:inherit; font:inherit}
+.mini-list{margin:0; padding:0; list-style:none; font-size:11.5px}
+.mini-list li{padding:3px 0; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.mini-list button{border:0; background:none; padding:0; color:inherit; font:inherit; text-align:left}
+.privacy p{font-size:11px; color:var(--ink2); margin:0 0 8px}
+.ghost{border:1px solid var(--line2); background:#fff; border-radius:4px; padding:5px 9px; font-size:11px; color:var(--ink2)}
+
+/* ---------- preview / empty ---------- */
+.preview{display:flex; flex-direction:column; gap:8px}
+.prow{border:1px solid var(--line); border-radius:var(--radius); padding:9px 11px; background:#fff}
+.prow .pt{font-size:12.5px; font-weight:600; margin:0 0 3px}
+.prow .pm{font-size:10.5px; color:var(--muted)}
+.empty{padding:48px 12px; text-align:center; color:var(--muted); font-size:12px}
+
+/* ---------- footer ---------- */
+.site-foot{
+  display:flex; flex-direction:column; gap:10px;
+  padding:16px 0 28px; color:var(--muted); font-size:11px;
+  border-top:1px solid var(--line); margin:0 28px;
+}
+.disclaimer{border:1px solid var(--line); background:#fcfbf9; border-radius:var(--radius); padding:10px 12px}
+.disclaimer h2{font-size:11px; color:var(--ink2); margin-bottom:5px; letter-spacing:.02em}
+.disclaimer ul{margin:0; padding-left:16px}
+.disclaimer li{margin:2px 0; line-height:1.55}
+.disclaimer em{font-style:normal; color:var(--accent); font-weight:600}
+.foot-meta{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap}
+
+.badge-beta{
+  font-size:10px; font-weight:600; letter-spacing:.08em; color:#8a6a24;
+  background:#fdf2d8; border:1px solid #e8d9b4; padding:2px 6px; border-radius:3px;
+}
+.fb-note{font-size:10.5px; color:var(--muted); margin:6px 0 8px}
+.fb-note.ok{color:var(--ok)}
+
+
+/* ---------- 意見・要望・苦情（mailto） ---------- */
+.panel.contact{border:1px solid #e8d2cd; background:#fdf7f5; border-radius:var(--radius);
+  padding:10px 12px; margin-bottom:16px}
+.panel.contact h2{color:var(--accent)}
+.contact-lead{font-size:11px; color:var(--ink2); margin:0 0 8px; line-height:1.55}
+.contact-btn{display:block; text-align:center; text-decoration:none; background:var(--accent);
+  color:#fff; border-radius:4px; padding:9px 10px; font-size:12.5px; font-weight:600}
+.contact-btn:hover{filter:brightness(1.06)}
+.contact-btn:focus-visible{outline:2px solid #6b2a22; outline-offset:2px}
+.panel.contact .ghost{margin-top:7px; width:100%}
+.foot-contact{display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:10px 12px; border:1px solid #e8d2cd; background:#fdf7f5; border-radius:var(--radius)}
+.foot-contact .contact-btn{display:inline-block; padding:6px 12px; font-size:12px}
+.ghost.small{padding:4px 8px; font-size:10.5px}
+
+/* ---------- responsive ---------- */
+@media (max-width:1080px){
+  .layout{grid-template-columns:200px minmax(0,1fr); }
+  .sidebar{grid-column:1 / -1; border-left:1px solid var(--line); border-top:0;
+    border-radius:0 0 var(--radius) var(--radius)}
+  .results{border-right:1px solid var(--line)}
+}
+@media (max-width:760px){
+  .site{padding:14px 16px 12px; flex-direction:column; align-items:flex-start}
+  .notice,.tabs,.layout,.site-foot{margin-left:0; margin-right:0}
+  .notice{margin:10px 16px 0}
+  .tabs{padding:10px 16px 0}
+  .layout{grid-template-columns:1fr; padding:0 16px 24px}
+  .filters{border-radius:var(--radius) var(--radius) 0 0; border-bottom:0}
+  .results{border-left:1px solid var(--line); border-right:1px solid var(--line)}
+  .site-foot{margin:0 16px; flex-direction:column}
+}
+
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="brand">
+    <h1>景品情報索引<span class="badge-demo">DEMO</span><span class="badge-beta">BETA</span></h1>
+    <p class="sub">日本夾機景品 ・ 一番くじ ｜ 情報索引（Beta 示範版・非官方）</p>
+  </div>
+  <div class="header-actions">
+    <div class="viewtoggle" role="group" aria-label="切換視角">
+      <button data-view="player" class="active" type="button">一般玩家</button>
+      <button data-view="shop" type="button">店舖採購視角</button>
+    </div>
+  </div>
+</header>
+
+<div class="notice" role="note">
+  <strong>示範數據</strong>：真實標題（bsp-prize／コレトレ 實測）＋ 標示 <em>DEMO</em> 嘅合成示範貨。
+  榜單標示為「<strong>玩家瀏覽熱度</strong>」，<u>唔係採購行情指標</u>。
+  搜尋、瀏覽記錄、收藏全部喺瀏覽器本地運算，唔上傳伺服器。
+</div>
+
+<nav class="tabs" aria-label="主分類">
+  <button data-channel="all" class="active" type="button">全部</button>
+  <button data-channel="prize" type="button">夾機景品</button>
+  <button data-channel="ichiban_kuji" type="button">一番くじ</button>
+  <button data-channel="preview" type="button">新貨速報</button>
+  <button data-channel="favorites" type="button">我的收藏 <span id="favCount" class="count">0</span></button>
+</nav>
+
+<main class="layout">
+  <aside class="filters" id="filters" aria-label="篩選"></aside>
+
+  <section class="results">
+    <div class="searchbar">
+      <input id="q" type="search" autocomplete="off"
+             placeholder="搵商品名／角色／IP／系列線…（例：MAXIMATIC、義勇、ちいかわ、Luminasta）">
+      <button id="clearQ" type="button" title="清除">✕</button>
+    </div>
+
+    <div class="result-head">
+      <span id="resultCount" class="muted">—</span>
+      <label class="sortwrap">排序
+        <select id="sort">
+          <option value="relevance">相關度</option>
+          <option value="newest">發售月（新→舊）</option>
+          <option value="views">瀏覽熱度</option>
+          <option value="price">基準價（高→低）</option>
+          <option value="size">尺寸（大→小）</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="list" class="cards"></div>
+    <div id="previewList" class="preview hidden"></div>
+    <div id="empty" class="empty hidden">冇符合條件嘅貨。試下減少篩選，或者用 IP／系列線搜。</div>
+  </section>
+
+  <aside class="sidebar">
+    <section class="panel">
+      <h2 id="rank1Title">7 日瀏覽熱度 TOP10</h2>
+      <p class="panel-note" id="rank1Note">玩家瀏覽熱度（非採購行情指標）</p>
+      <ol id="rankItems" class="rank"></ol>
+    </section>
+
+    <section class="panel">
+      <h2 id="rank2Title">IP 瀏覽熱度</h2>
+      <p class="panel-note" id="rank2Note">按商品瀏覽量彙總，唔係搜尋查詢量</p>
+      <ol id="rankIp" class="rank"></ol>
+    </section>
+
+    <section class="panel">
+      <h2>我的收藏</h2>
+      <ul id="favList" class="mini-list"><li class="muted">未有收藏</li></ul>
+    </section>
+
+    <section class="panel">
+      <h2>最近搜尋</h2>
+      <ul id="recentQ" class="mini-list"><li class="muted">—</li></ul>
+    </section>
+
+    <section class="panel contact">
+      <h2>意見・要望・苦情</h2>
+      <p class="contact-lead">缺貨、想加 IP／系列、資料有錯、用落唔順、想鬧——直接開郵件寫就得。</p>
+      <a class="contact-btn" data-contact href="mailto:" rel="nofollow noopener">意見・要望・苦情はこちら</a>
+      <button id="copyTemplate" class="ghost" type="button">一鍵複製郵件模板</button>
+      <p class="fb-note" id="tplNote">複製「版本號＋你嘅情況」做模板，貼落郵件就發。唔使註冊、唔使填表。</p>
+    </section>
+
+    <section class="panel privacy">
+      <h2>私隱</h2>
+      <p>搜尋同篩選喺頁面內完成；瀏覽記錄、收藏、最近搜尋存喺 <code>localStorage</code>，唔會離開你部機。冇分析追蹤 script、冇 cookie。</p>
+      <button id="exportFeedback" class="ghost" type="button">複製我嘅搜尋記錄（自願回報 Beta 用）</button>
+      <p class="fb-note" id="fbNote">只會複製你最近嘅搜尋詞同篩選狀態成文字，由你自行貼返俾我。唔會自動上傳。</p>
+      <button id="clearLocal" class="ghost" type="button">清除本地資料</button>
+    </section>
+  </aside>
+</main>
+
+<footer class="site-foot">
+  <div class="foot-contact">
+    <a class="contact-btn" data-contact href="mailto:" rel="nofollow noopener">意見・要望・苦情はこちら</a>
+    <button id="copyTemplateFoot" class="ghost small" type="button">複製郵件模板</button>
+    <span class="muted">直接開你嘅郵件程式，冇表單、冇追蹤、冇 cookie。</span>
+  </div>
+  <section class="disclaimer">
+    <h2>免責聲明（Beta 示範版）</h2>
+    <ul>
+      <li>本頁為 <strong>Beta 示範版</strong>。數據混合<strong>真實標題</strong>（bsp-prize／コレトレ 實測）同標示 <em>DEMO</em> 嘅<strong>合成示範樣本</strong>。</li>
+      <li>價格、成交樣本、瀏覽數、榜單名次<strong>全部係示範數值</strong>，唔代表真實行情或市場實況。</li>
+      <li>本網站<strong>非官方</strong>網站，與任何廠商、問屋、拍賣平台沒有合作或授權關係。</li>
+      <li>所有內容<strong>不構成入貨、投資或購買建議</strong>；使用者須自行判斷風險。</li>
+      <li>暫時<strong>不提供任何商品原圖</strong>，只有文字情報，以避免圖片版權問題。</li>
+      <li><strong>零收集</strong>：冇分析追蹤 script、冇 cookie、冇 user id；搜尋／收藏／瀏覽記錄只存喺你部機嘅 <code>localStorage</code>。</li>
+      <li>商標及作品名稱屬各自權利人所有，本頁只作情報索引用途。</li>
+    </ul>
+  </section>
+  <div class="foot-meta">
+    <span>Beta v0.3 · 分類樹由 <code>taxonomy.json</code> 自動同步</span>
+    <span id="metaCount" class="muted"></span>
+  </div>
+</footer>
+
+<script>
+window.__PI_INLINE__ = {taxonomy: {
+  "_meta": {
+    "generated_at": "2026-10-28",
+    "generator": "module1/export_taxonomy.py",
+    "sources": [
+      "module1/aliases.py",
+      "schema/01_schema.sql",
+      "schema/gen_seed.py"
+    ],
+    "do_not_edit": "唔准手改；改來源後重跑 script",
+    "counts": {
+      "makers": 9,
+      "works": 100,
+      "brand_lines": 25,
+      "categories": 12
+    }
+  },
+  "nav": [
+    {
+      "id": "kuji",
+      "label_zh": "一番くじ",
+      "label_jp": "一番くじ",
+      "route": "/kuji",
+      "status": "ok"
+    },
+    {
+      "id": "prize",
+      "label_zh": "夾機景品",
+      "label_jp": "プライズ",
+      "route": "/prize",
+      "status": "ok"
+    },
+    {
+      "id": "used",
+      "label_zh": "中古二手",
+      "label_jp": "中古",
+      "route": "/used",
+      "status": "ok",
+      "note": "只存外部連結＋樣本價，唔抓全量"
+    },
+    {
+      "id": "schedule",
+      "label_zh": "發售日程",
+      "label_jp": "発売スケジュール",
+      "route": "/schedule",
+      "status": "ok"
+    },
+    {
+      "id": "market",
+      "label_zh": "行情數據",
+      "label_jp": "相場",
+      "route": "/market",
+      "status": "phase2",
+      "note": "第一階段只出 price_ref 基準線，唔做走勢圖"
+    },
+    {
+      "id": "ranking",
+      "label_zh": "排行榜",
+      "label_jp": "ランキング",
+      "route": "/ranking",
+      "status": "pending",
+      "note": "等決定：item 級每日聚合（方案A）或外部訊號（方案B）"
+    },
+    {
+      "id": "mine",
+      "label_zh": "我的收藏",
+      "label_jp": "マイリスト",
+      "route": "/mine",
+      "status": "ok",
+      "note": "純 localStorage，零後端"
+    }
+  ],
+  "filters": {
+    "channel_type": [
+      {
+        "code": "prize",
+        "label_zh": "夾機景品",
+        "label_jp": "プライズ",
+        "nav": "prize"
+      },
+      {
+        "code": "ichiban_kuji",
+        "label_zh": "一番くじ",
+        "label_jp": "一番くじ",
+        "nav": "kuji"
+      },
+      {
+        "code": "gacha",
+        "label_zh": "扭蛋",
+        "label_jp": "ガチャ",
+        "nav": null
+      },
+      {
+        "code": "retail",
+        "label_zh": "一般販售",
+        "label_jp": "一般販売",
+        "nav": null
+      }
+    ],
+    "maker": [
+      {
+        "code": "bandai_spirits",
+        "name_jp": "BANDAI SPIRITS（バンプレスト）",
+        "name_en": "Bandai Spirits",
+        "aliases": [
+          "バンプレスト",
+          "バンプレ",
+          "BANPRESTO",
+          "バンダイスピリッツ",
+          "BANDAI SPIRITS"
+        ]
+      },
+      {
+        "code": "sega_fave",
+        "name_jp": "セガ フェイブ",
+        "name_en": "Sega Fave",
+        "aliases": [
+          "セガ",
+          "SEGA",
+          "セガフェイブ",
+          "セガ フェイブ"
+        ]
+      },
+      {
+        "code": "taito",
+        "name_jp": "タイトー",
+        "name_en": "Taito",
+        "aliases": [
+          "TAITO",
+          "株式会社タイトー"
+        ]
+      },
+      {
+        "code": "furyu",
+        "name_jp": "フリュー",
+        "name_en": "FuRyu",
+        "aliases": [
+          "FURYU",
+          "フリュー"
+        ]
+      },
+      {
+        "code": "eikoh",
+        "name_jp": "エイコー",
+        "name_en": "Eikoh",
+        "aliases": [
+          "EIKOH",
+          "エイコー"
+        ]
+      },
+      {
+        "code": "system_service",
+        "name_jp": "システムサービス",
+        "name_en": "System Service",
+        "aliases": [
+          "SYSTEM SERVICE"
+        ]
+      },
+      {
+        "code": "konami_ags",
+        "name_jp": "コナミアーケードゲームス",
+        "name_en": "Konami Amusement",
+        "aliases": [
+          "コナミ",
+          "KONAMI",
+          "コナミアミューズメント"
+        ]
+      },
+      {
+        "code": "kitan_club",
+        "name_jp": "奇譚クラブ",
+        "name_en": "Kitan Club",
+        "aliases": [
+          "KITAN CLUB"
+        ]
+      },
+      {
+        "code": "other",
+        "name_jp": "その他",
+        "name_en": "Other",
+        "aliases": [
+          "TAKARA",
+          "TAKARA TOMY",
+          "タカラトミー"
+        ]
+      }
+    ],
+    "brand_line": [
+      {
+        "code": "maximatic",
+        "maker": "bandai_spirits",
+        "name": "MAXIMATIC",
+        "aliases": [
+          "マキシマティック"
+        ]
+      },
+      {
+        "code": "grandista",
+        "maker": "bandai_spirits",
+        "name": "Grandista",
+        "aliases": [
+          "グランディスタ"
+        ]
+      },
+      {
+        "code": "vibration_stars",
+        "maker": "bandai_spirits",
+        "name": "VIBRATION STARS",
+        "aliases": [
+          "バイブレーションスターズ"
+        ]
+      },
+      {
+        "code": "memorable_saga",
+        "maker": "bandai_spirits",
+        "name": "Memorable Saga",
+        "aliases": [
+          "メモラブルサーガ"
+        ]
+      },
+      {
+        "code": "spiritflicks",
+        "maker": "bandai_spirits",
+        "name": "SPIRITFLICKS",
+        "aliases": [
+          "スピリットフリックス"
+        ]
+      },
+      {
+        "code": "banpresto_figure",
+        "maker": "bandai_spirits",
+        "name": "BANPRESTO FIGURE",
+        "aliases": [
+          "バンプレストフィギュア"
+        ]
+      },
+      {
+        "code": "brc",
+        "maker": "bandai_spirits",
+        "name": "BATTLE RECORD COLLECTION",
+        "aliases": [
+          "バトルレコードコレクション"
+        ]
+      },
+      {
+        "code": "glitter_glamours",
+        "maker": "bandai_spirits",
+        "name": "GLITTER&GLAMOURS",
+        "aliases": [
+          "グリッターアンドグラマラス"
+        ]
+      },
+      {
+        "code": "glasscape",
+        "maker": "bandai_spirits",
+        "name": "Glasscape",
+        "aliases": [
+          "グラスケープ"
+        ]
+      },
+      {
+        "code": "espresto",
+        "maker": "bandai_spirits",
+        "name": "ESPRESTO",
+        "aliases": [
+          "エスプレスト"
+        ]
+      },
+      {
+        "code": "sofvimates",
+        "maker": "bandai_spirits",
+        "name": "SOFVIMATES",
+        "aliases": [
+          "ソフビメイツ"
+        ]
+      },
+      {
+        "code": "banpre_kuji",
+        "maker": "bandai_spirits",
+        "name": "バンプレくじ",
+        "aliases": [
+          "バンプレくじ",
+          "バンプレストくじ"
+        ]
+      },
+      {
+        "code": "naruto72",
+        "maker": "bandai_spirits",
+        "name": "NARUTO 72 series",
+        "aliases": [
+          "NARUTO72"
+        ]
+      },
+      {
+        "code": "noodle_stopper",
+        "maker": "furyu",
+        "name": "ぬーどるストッパーフィギュア",
+        "aliases": [
+          "ヌードルストッパー",
+          "ぬーどるすとっぱー"
+        ]
+      },
+      {
+        "code": "bicute_bunnies",
+        "maker": "furyu",
+        "name": "BiCute Bunnies",
+        "aliases": [
+          "ビキュートバニーズ"
+        ]
+      },
+      {
+        "code": "bicute_dark",
+        "maker": "furyu",
+        "name": "BiCute Dark",
+        "aliases": [
+          "ビキュートダーク"
+        ]
+      },
+      {
+        "code": "kurippy",
+        "maker": "furyu",
+        "name": "くりっぴぃ",
+        "aliases": [
+          "クリッピー"
+        ]
+      },
+      {
+        "code": "melffy",
+        "maker": "furyu",
+        "name": "melffy",
+        "aliases": [
+          "メルフィ"
+        ]
+      },
+      {
+        "code": "tenitol",
+        "maker": "furyu",
+        "name": "TENITOL",
+        "aliases": [
+          "テニトル"
+        ]
+      },
+      {
+        "code": "luminasta",
+        "maker": "sega_fave",
+        "name": "Luminasta",
+        "aliases": [
+          "ルミナスタ"
+        ]
+      },
+      {
+        "code": "spm",
+        "maker": "sega_fave",
+        "name": "SPM（スーパープレミアムフィギュア）",
+        "aliases": [
+          "スーパープレミアムフィギュア",
+          "SPM"
+        ]
+      },
+      {
+        "code": "yumemirize",
+        "maker": "sega_fave",
+        "name": "Yumemirize",
+        "aliases": [
+          "ユメミライズ"
+        ]
+      },
+      {
+        "code": "desktop_x2",
+        "maker": "sega_fave",
+        "name": "Desktop×Desktop",
+        "aliases": [
+          "デスクトップ"
+        ]
+      },
+      {
+        "code": "desktop_cute",
+        "maker": "taito",
+        "name": "Desktop Cute",
+        "aliases": [
+          "デスクトップキュート"
+        ]
+      },
+      {
+        "code": "amp_plus",
+        "maker": "taito",
+        "name": "AMP＋",
+        "aliases": [
+          "アンプラス"
+        ]
+      }
+    ],
+    "ip_work": [
+      {
+        "code": "kimetsu",
+        "title_jp": "鬼滅の刃",
+        "title_en": "Demon Slayer",
+        "title_zh": "鬼滅之刃",
+        "aliases": [
+          "鬼滅の刃",
+          "Kimetsu"
+        ]
+      },
+      {
+        "code": "one_piece",
+        "title_jp": "ONE PIECE",
+        "title_en": "One Piece",
+        "title_zh": "海賊王",
+        "aliases": [
+          "ワンピース",
+          "ONE PIECE",
+          "海賊王"
+        ]
+      },
+      {
+        "code": "jujutsu",
+        "title_jp": "呪術廻戦",
+        "title_en": "Jujutsu Kaisen",
+        "title_zh": "咒術迴戰",
+        "aliases": [
+          "呪術廻戦",
+          "呪術"
+        ]
+      },
+      {
+        "code": "dragon_ball",
+        "title_jp": "ドラゴンボール",
+        "title_en": "Dragon Ball",
+        "title_zh": "龍珠",
+        "aliases": [
+          "ドラゴンボール シリーズ",
+          "ドラゴンボール",
+          "DRAGON BALL",
+          "龍珠"
+        ]
+      },
+      {
+        "code": "naruto",
+        "title_jp": "NARUTO-ナルト- 疾風伝",
+        "title_en": "Naruto Shippuden",
+        "title_zh": "火影忍者",
+        "aliases": [
+          "NARUTO-ナルト- 疾風伝",
+          "NARUTO",
+          "ナルト",
+          "火影忍者"
+        ]
+      },
+      {
+        "code": "chiikawa",
+        "title_jp": "ちいかわ",
+        "title_en": "Chiikawa",
+        "title_zh": "吉伊卡哇",
+        "aliases": [
+          "ちいかわ"
+        ]
+      },
+      {
+        "code": "sanrio",
+        "title_jp": "サンリオキャラクターズ",
+        "title_en": "Sanrio Characters",
+        "title_zh": "Sanrio",
+        "aliases": [
+          "サンリオキャラクターズ",
+          "サンリオ"
+        ]
+      },
+      {
+        "code": "blue_archive",
+        "title_jp": "ブルーアーカイブ",
+        "title_en": "Blue Archive",
+        "title_zh": "蔚藍檔案",
+        "aliases": [
+          "ブルーアーカイブ"
+        ]
+      },
+      {
+        "code": "uma_musume",
+        "title_jp": "ウマ娘 プリティーダービー",
+        "title_en": "Uma Musume",
+        "title_zh": "賽馬娘",
+        "aliases": [
+          "ウマ娘"
+        ]
+      },
+      {
+        "code": "touhou",
+        "title_jp": "東方Project",
+        "title_en": "Touhou Project",
+        "title_zh": "東方Project",
+        "aliases": [
+          "東方Project",
+          "東方"
+        ]
+      },
+      {
+        "code": "evangelion",
+        "title_jp": "ヱヴァンゲリヲン新劇場版",
+        "title_en": "Evangelion",
+        "title_zh": "新世紀福音戰士",
+        "aliases": [
+          "ヱヴァンゲリヲン"
+        ]
+      },
+      {
+        "code": "k_on",
+        "title_jp": "けいおん！",
+        "title_en": "K-On!",
+        "title_zh": "K-ON！",
+        "aliases": [
+          "けいおん！",
+          "けいおん",
+          "K-ON!"
+        ]
+      },
+      {
+        "code": "zootopia",
+        "title_jp": "ズートピア",
+        "title_en": "Zootopia",
+        "title_zh": "優獸大都會",
+        "aliases": [
+          "ズートピア"
+        ]
+      },
+      {
+        "code": "minecraft",
+        "title_jp": "マインクラフト",
+        "title_en": "Minecraft",
+        "title_zh": "Minecraft",
+        "aliases": [
+          "マインクラフト",
+          "Minecraft"
+        ]
+      },
+      {
+        "code": "toy_story",
+        "title_jp": "トイ・ストーリー",
+        "title_en": "Toy Story",
+        "title_zh": "反斗奇兵",
+        "aliases": [
+          "トイ・ストーリー"
+        ]
+      },
+      {
+        "code": "kingdom",
+        "title_jp": "キングダム",
+        "title_en": "Kingdom",
+        "title_zh": "王者天下",
+        "aliases": [
+          "キングダム"
+        ]
+      },
+      {
+        "code": "hunter",
+        "title_jp": "HUNTER×HUNTER",
+        "title_en": "Hunter x Hunter",
+        "title_zh": "全職獵人",
+        "aliases": [
+          "HUNTER×HUNTER"
+        ]
+      },
+      {
+        "code": "overlord",
+        "title_jp": "オーバーロード",
+        "title_en": "Overlord",
+        "title_zh": "Overlord",
+        "aliases": [
+          "オーバーロード"
+        ]
+      },
+      {
+        "code": "lycoris",
+        "title_jp": "リコリス・リコイル",
+        "title_en": "Lycoris Recoil",
+        "title_zh": "Lycoris Recoil",
+        "aliases": [
+          "リコリス・リコイル"
+        ]
+      },
+      {
+        "code": "dandadan",
+        "title_jp": "ダンダダン",
+        "title_en": "Dandadan",
+        "title_zh": "Dandadan",
+        "aliases": [
+          "ダンダダン"
+        ]
+      },
+      {
+        "code": "kamen_rider",
+        "title_jp": "仮面ライダー",
+        "title_en": "Kamen Rider",
+        "title_zh": "幪面超人",
+        "aliases": [
+          "仮面ライダー"
+        ]
+      },
+      {
+        "code": "ultraman",
+        "title_jp": "ウルトラマンシリーズ",
+        "title_en": "Ultraman",
+        "title_zh": "超人",
+        "aliases": [
+          "ウルトラマン"
+        ]
+      },
+      {
+        "code": "irodori",
+        "title_jp": "いちご100％",
+        "title_en": "Strawberry 100%",
+        "title_zh": "草莓100%",
+        "aliases": [
+          "いちご100％",
+          "いちご100%"
+        ]
+      },
+      {
+        "code": "to_love_ru",
+        "title_jp": "To LOVEる",
+        "title_en": "To Love-Ru",
+        "title_zh": "出包王女",
+        "aliases": [
+          "To LOVEる ダークネス",
+          "To LOVEる",
+          "出包王女"
+        ]
+      },
+      {
+        "code": "kisekoi",
+        "title_jp": "その着せ替え人形は恋をする",
+        "title_en": "My Dress-Up Darling",
+        "title_zh": "戀上換裝娃娃",
+        "aliases": [
+          "その着せ替え人形は恋をする",
+          "着せ恋",
+          "戀上換裝娃娃"
+        ]
+      },
+      {
+        "code": "blue_lock",
+        "title_jp": "ブルーロック",
+        "title_en": "Blue Lock",
+        "title_zh": "藍色監獄",
+        "aliases": [
+          "ブルーロック"
+        ]
+      },
+      {
+        "code": "doraemon",
+        "title_jp": "ドラえもん",
+        "title_en": "Doraemon",
+        "title_zh": "多啦A夢",
+        "aliases": [
+          "ドラえもん"
+        ]
+      },
+      {
+        "code": "pokemon",
+        "title_jp": "ポケットモンスター",
+        "title_en": "Pokemon",
+        "title_zh": "寵物小精靈",
+        "aliases": [
+          "ポケモンモンスターシリーズ",
+          "ポケットモンスター",
+          "ポケモン",
+          "Pokemon"
+        ]
+      },
+      {
+        "code": "precure",
+        "title_jp": "プリキュア",
+        "title_en": "Precure",
+        "title_zh": "光之美少女",
+        "aliases": [
+          "プリキュア"
+        ]
+      },
+      {
+        "code": "one_punch",
+        "title_jp": "ワンパンマン",
+        "title_en": "One Punch Man",
+        "title_zh": "一拳超人",
+        "aliases": [
+          "ワンパンマン"
+        ]
+      },
+      {
+        "code": "kusuriya",
+        "title_jp": "薬屋のひとりごと",
+        "title_en": "Apothecary Diaries",
+        "title_zh": "藥屋少女的呢喃",
+        "aliases": [
+          "薬屋のひとりごと",
+          "薬屋"
+        ]
+      },
+      {
+        "code": "baki",
+        "title_jp": "刃牙",
+        "title_en": "Baki",
+        "title_zh": "刃牙",
+        "aliases": [
+          "刃牙"
+        ]
+      },
+      {
+        "code": "kochikame",
+        "title_jp": "こちら葛飾区亀有公園前派出所",
+        "title_en": "Kochikame",
+        "title_zh": "烏龍派出所",
+        "aliases": [
+          "こちら葛飾区亀有公園前派出所",
+          "こち亀"
+        ]
+      },
+      {
+        "code": "thoroughbred",
+        "title_jp": "サラブレッドコレクション",
+        "title_en": "Thoroughbred Collection",
+        "title_zh": "賽馬收藏",
+        "aliases": [
+          "サラブレッドコレクション"
+        ]
+      },
+      {
+        "code": "chainsaw_man",
+        "title_jp": "チェンソーマン",
+        "title_en": "Chainsaw Man",
+        "title_zh": "電鋸人",
+        "aliases": [
+          "チェンソーマン"
+        ]
+      },
+      {
+        "code": "gakuen_idolmaster",
+        "title_jp": "学園アイドルマスター",
+        "title_en": "Gakuen Idolmaster",
+        "title_zh": "學園偶像大師",
+        "aliases": [
+          "学園アイドルマスター",
+          "学マス"
+        ]
+      },
+      {
+        "code": "star_kirby",
+        "title_jp": "星のカービィ",
+        "title_en": "Kirby",
+        "title_zh": "星之卡比",
+        "aliases": [
+          "星のカービィ",
+          "カービィ"
+        ]
+      },
+      {
+        "code": "suzumiya",
+        "title_jp": "涼宮ハルヒの憂鬱",
+        "title_en": "Haruhi Suzumiya",
+        "title_zh": "涼宮春日的憂鬱",
+        "aliases": [
+          "涼宮ハルヒの憂鬱",
+          "涼宮ハルヒ"
+        ]
+      },
+      {
+        "code": "hokuto",
+        "title_jp": "北斗の拳",
+        "title_en": "Fist of the North Star",
+        "title_zh": "北斗之拳",
+        "aliases": [
+          "北斗の拳",
+          "FIST OF THE NORTH STAR"
+        ]
+      },
+      {
+        "code": "gundam_seed",
+        "title_jp": "機動戦士ガンダムSEED",
+        "title_en": "Gundam SEED",
+        "title_zh": "機動戰士高達SEED",
+        "aliases": [
+          "機動戦士ガンダムSEED",
+          "ガンダムSEED"
+        ]
+      },
+      {
+        "code": "needy_girl",
+        "title_jp": "NEEDY GIRL OVERDOSE",
+        "title_en": "Needy Girl Overdose",
+        "title_zh": "主播女孩重度依賴",
+        "aliases": [
+          "NEEDY GIRL OVERDOSE",
+          "NEEDY STREAMER OVERLOAD"
+        ]
+      },
+      {
+        "code": "lovot",
+        "title_jp": "LOVOT",
+        "title_en": "LOVOT",
+        "title_zh": "LOVOT",
+        "aliases": [
+          "LOVOT"
+        ]
+      },
+      {
+        "code": "nyanko",
+        "title_jp": "にゃんこ大戦争",
+        "title_en": "Battle Cats",
+        "title_zh": "貓咪大戰爭",
+        "aliases": [
+          "にゃんこ大戦争"
+        ]
+      },
+      {
+        "code": "shingeki",
+        "title_jp": "進撃の巨人",
+        "title_en": "Attack on Titan",
+        "title_zh": "進擊的巨人",
+        "aliases": [
+          "進撃の巨人"
+        ]
+      },
+      {
+        "code": "toaru",
+        "title_jp": "とある科学の超電磁砲",
+        "title_en": "A Certain Scientific Railgun",
+        "title_zh": "科學超電磁砲",
+        "aliases": [
+          "とある科学の超電磁砲T",
+          "とある科学の超電磁砲"
+        ]
+      },
+      {
+        "code": "saki",
+        "title_jp": "咲-Saki-",
+        "title_en": "Saki",
+        "title_zh": "咲-Saki-",
+        "aliases": [
+          "咲-Saki-"
+        ]
+      },
+      {
+        "code": "tensura",
+        "title_jp": "転生したらスライムだった件",
+        "title_en": "That Time I Got Reincarnated as a Slime",
+        "title_zh": "關於我轉生變成史萊姆這檔事",
+        "aliases": [
+          "転生したらスライムだった件",
+          "転スラ"
+        ]
+      },
+      {
+        "code": "kingdom_hearts",
+        "title_jp": "KINGDOM HEARTS",
+        "title_en": "Kingdom Hearts",
+        "title_zh": "王國之心",
+        "aliases": [
+          "KINGDOM HEARTS"
+        ]
+      },
+      {
+        "code": "frieren",
+        "title_jp": "葬送のフリーレン",
+        "title_en": "Frieren",
+        "title_zh": "葬送的芙莉蓮",
+        "aliases": [
+          "フリーレン",
+          "葬送のフリーレン"
+        ]
+      },
+      {
+        "code": "oshi_no_ko",
+        "title_jp": "【推しの子】",
+        "title_en": "Oshi no Ko",
+        "title_zh": "我推的孩子",
+        "aliases": [
+          "推しの子",
+          "オシのコ"
+        ]
+      },
+      {
+        "code": "spy_family",
+        "title_jp": "SPY×FAMILY",
+        "title_en": "Spy x Family",
+        "title_zh": "間諜家家酒",
+        "aliases": [
+          "スパイファミリー",
+          "スパイ×ファミリー",
+          "アーニャ"
+        ]
+      },
+      {
+        "code": "tokyo_revengers",
+        "title_jp": "東京リベンジャーズ",
+        "title_en": "Tokyo Revengers",
+        "title_zh": "東京復仇者",
+        "aliases": [
+          "東リベ",
+          "東京リベンジャー"
+        ]
+      },
+      {
+        "code": "haikyu",
+        "title_jp": "ハイキュー!!",
+        "title_en": "Haikyu!!",
+        "title_zh": "排球少年",
+        "aliases": [
+          "ハイキュー",
+          "排球"
+        ]
+      },
+      {
+        "code": "heroaca",
+        "title_jp": "僕のヒーローアカデミア",
+        "title_en": "My Hero Academia",
+        "title_zh": "我的英雄學院",
+        "aliases": [
+          "ヒロアカ",
+          "僕のヒーロー"
+        ]
+      },
+      {
+        "code": "bleach",
+        "title_jp": "BLEACH",
+        "title_en": "Bleach",
+        "title_zh": "死神",
+        "aliases": [
+          "ブリーチ"
+        ]
+      },
+      {
+        "code": "gintama",
+        "title_jp": "銀魂",
+        "title_en": "Gintama",
+        "title_zh": "銀魂",
+        "aliases": [
+          "銀魂"
+        ]
+      },
+      {
+        "code": "hololive",
+        "title_jp": "ホロライブ",
+        "title_en": "Hololive",
+        "title_zh": "hololive",
+        "aliases": [
+          "ホロ",
+          "hololive"
+        ]
+      },
+      {
+        "code": "nijisanji",
+        "title_jp": "にじさんじ",
+        "title_en": "Nijisanji",
+        "title_zh": "彩虹社",
+        "aliases": [
+          "にじさんじ"
+        ]
+      },
+      {
+        "code": "lovelive",
+        "title_jp": "ラブライブ！",
+        "title_en": "Love Live!",
+        "title_zh": "LoveLive!",
+        "aliases": [
+          "ラブライブ",
+          "LoveLive"
+        ]
+      },
+      {
+        "code": "idolmaster",
+        "title_jp": "アイドルマスター",
+        "title_en": "The Idolmaster",
+        "title_zh": "偶像大師",
+        "aliases": [
+          "アイマス",
+          "デレステ",
+          "シャニマス",
+          "ミリオンライブ"
+        ]
+      },
+      {
+        "code": "utapri",
+        "title_jp": "うたの☆プリンスさまっ♪",
+        "title_en": "Uta no Prince-sama",
+        "title_zh": "歌之王子殿下",
+        "aliases": [
+          "うたプリ"
+        ]
+      },
+      {
+        "code": "sumikko",
+        "title_jp": "すみっコぐらし",
+        "title_en": "Sumikko Gurashi",
+        "title_zh": "角落小夥伴",
+        "aliases": [
+          "すみっコ",
+          "すみっこぐらし",
+          "角落生物"
+        ]
+      },
+      {
+        "code": "opanchu",
+        "title_jp": "おぱんちゅうさぎ",
+        "title_en": "Opanchu Usagi",
+        "title_zh": "內褲兔",
+        "aliases": [
+          "おぱんちゅ"
+        ]
+      },
+      {
+        "code": "mofusand",
+        "title_jp": "mofusand",
+        "title_en": "mofusand",
+        "title_zh": "mofusand",
+        "aliases": [
+          "モフサンド",
+          "モフサンド"
+        ]
+      },
+      {
+        "code": "kaiju_no8",
+        "title_jp": "怪獣8号",
+        "title_en": "Kaiju No. 8",
+        "title_zh": "怪獸8號",
+        "aliases": [
+          "怪獣８号",
+          "怪獣8"
+        ]
+      },
+      {
+        "code": "dungeon_meshi",
+        "title_jp": "ダンジョン飯",
+        "title_en": "Delicious in Dungeon",
+        "title_zh": "迷宮飯",
+        "aliases": [
+          "ダンジョン飯",
+          "ダンジョンめし"
+        ]
+      },
+      {
+        "code": "ranma",
+        "title_jp": "らんま1/2",
+        "title_en": "Ranma 1/2",
+        "title_zh": "亂馬1/2",
+        "aliases": [
+          "らんま",
+          "らんま½"
+        ]
+      },
+      {
+        "code": "urusei",
+        "title_jp": "うる星やつら",
+        "title_en": "Urusei Yatsura",
+        "title_zh": "福星小子",
+        "aliases": [
+          "うる星"
+        ]
+      },
+      {
+        "code": "inuyasha",
+        "title_jp": "犬夜叉",
+        "title_en": "Inuyasha",
+        "title_zh": "犬夜叉",
+        "aliases": [
+          "犬夜叉"
+        ]
+      },
+      {
+        "code": "jojo",
+        "title_jp": "ジョジョの奇妙な冒険",
+        "title_en": "JoJo's Bizarre Adventure",
+        "title_zh": "JOJO的奇妙冒險",
+        "aliases": [
+          "ジョジョ",
+          "JOJO"
+        ]
+      },
+      {
+        "code": "fate",
+        "title_jp": "Fate/Grand Order",
+        "title_en": "Fate/Grand Order",
+        "title_zh": "FGO",
+        "aliases": [
+          "FGO",
+          "フェイト",
+          "Fate"
+        ]
+      },
+      {
+        "code": "monster_hunter",
+        "title_jp": "モンスターハンター",
+        "title_en": "Monster Hunter",
+        "title_zh": "魔物獵人",
+        "aliases": [
+          "モンハン"
+        ]
+      },
+      {
+        "code": "zelda",
+        "title_jp": "ゼルダの伝説",
+        "title_en": "The Legend of Zelda",
+        "title_zh": "薩爾達傳說",
+        "aliases": [
+          "ゼルダ"
+        ]
+      },
+      {
+        "code": "mario",
+        "title_jp": "スーパーマリオ",
+        "title_en": "Super Mario",
+        "title_zh": "超級瑪利歐",
+        "aliases": [
+          "マリオ"
+        ]
+      },
+      {
+        "code": "dragon_quest",
+        "title_jp": "ドラゴンクエスト",
+        "title_en": "Dragon Quest",
+        "title_zh": "勇者鬥惡龍",
+        "aliases": [
+          "ドラクエ",
+          "DQ"
+        ]
+      },
+      {
+        "code": "disney_tsum",
+        "title_jp": "ディズニーツムツム",
+        "title_en": "Disney Tsum Tsum",
+        "title_zh": "Tsum Tsum",
+        "aliases": [
+          "ツムツム"
+        ]
+      },
+      {
+        "code": "detective_conan",
+        "title_jp": "名探偵コナン",
+        "title_en": "Detective Conan",
+        "title_zh": "名偵探柯南",
+        "aliases": [
+          "コナン"
+        ]
+      },
+      {
+        "code": "shinchan",
+        "title_jp": "クレヨンしんちゃん",
+        "title_en": "Crayon Shin-chan",
+        "title_zh": "蠟筆小新",
+        "aliases": [
+          "しんちゃん"
+        ]
+      },
+      {
+        "code": "sazae",
+        "title_jp": "サザエさん",
+        "title_en": "Sazae-san",
+        "title_zh": "海螺小姐",
+        "aliases": [
+          "サザエ"
+        ]
+      },
+      {
+        "code": "chibimaruko",
+        "title_jp": "ちびまる子ちゃん",
+        "title_en": "Chibi Maruko-chan",
+        "title_zh": "櫻桃小丸子",
+        "aliases": [
+          "まる子"
+        ]
+      },
+      {
+        "code": "slamdunk",
+        "title_jp": "SLAM DUNK",
+        "title_en": "Slam Dunk",
+        "title_zh": "灌籃高手",
+        "aliases": [
+          "スラムダンク"
+        ]
+      },
+      {
+        "code": "gundam",
+        "title_jp": "機動戦士ガンダム",
+        "title_en": "Mobile Suit Gundam",
+        "title_zh": "機動戰士高達",
+        "aliases": [
+          "ガンダム"
+        ]
+      },
+      {
+        "code": "sailor_moon",
+        "title_jp": "美少女戦士セーラームーン",
+        "title_en": "Sailor Moon",
+        "title_zh": "美少女戰士",
+        "aliases": [
+          "セーラームーン"
+        ]
+      },
+      {
+        "code": "cardcaptor",
+        "title_jp": "カードキャプターさくら",
+        "title_en": "Cardcaptor Sakura",
+        "title_zh": "庫洛魔法使",
+        "aliases": [
+          "さくら"
+        ]
+      },
+      {
+        "code": "arknights",
+        "title_jp": "アークナイツ",
+        "title_en": "Arknights",
+        "title_zh": "明日方舟",
+        "aliases": [
+          "アークナイツ",
+          "明日方舟"
+        ]
+      },
+      {
+        "code": "ao_no_hako",
+        "title_jp": "アオのハコ",
+        "title_en": "Blue Box",
+        "title_zh": "青之蘆葦",
+        "aliases": [
+          "アオのハコ"
+        ]
+      },
+      {
+        "code": "seishun_buta",
+        "title_jp": "青春ブタ野郎シリーズ",
+        "title_en": "Rascal Does Not Dream",
+        "title_zh": "青春豬頭少年",
+        "aliases": [
+          "青ブタ",
+          "青春ブタ"
+        ]
+      },
+      {
+        "code": "sadako",
+        "title_jp": "貞子",
+        "title_en": "Sadako",
+        "title_zh": "貞子",
+        "aliases": [
+          "貞子"
+        ]
+      },
+      {
+        "code": "nikke",
+        "title_jp": "勝利の女神NIKKE",
+        "title_en": "Goddess of Victory: Nikke",
+        "title_zh": "勝利女神",
+        "aliases": [
+          "NIKKE"
+        ]
+      },
+      {
+        "code": "fairytail",
+        "title_jp": "FAIRY TAIL",
+        "title_en": "Fairy Tail",
+        "title_zh": "妖精的尾巴",
+        "aliases": [
+          "フェアリーテイル"
+        ]
+      },
+      {
+        "code": "moomin",
+        "title_jp": "ムーミン",
+        "title_en": "Moomin",
+        "title_zh": "姆明",
+        "aliases": [
+          "ムーミン"
+        ]
+      },
+      {
+        "code": "kagurabachi",
+        "title_jp": "カグラバチ",
+        "title_en": "Kagurabachi",
+        "title_zh": "神樂鉢",
+        "aliases": [
+          "カグラバチ"
+        ]
+      },
+      {
+        "code": "ouran",
+        "title_jp": "桜蘭高校ホスト部",
+        "title_en": "Ouran High School Host Club",
+        "title_zh": "櫻蘭高校男公關部",
+        "aliases": [
+          "桜蘭"
+        ]
+      },
+      {
+        "code": "obungu",
+        "title_jp": "お文具といっしょ",
+        "title_en": "Obungu to Issho",
+        "title_zh": "與文具在一起",
+        "aliases": [
+          "お文具"
+        ]
+      },
+      {
+        "code": "made_in_abyss",
+        "title_jp": "メイドインアビス",
+        "title_en": "Made in Abyss",
+        "title_zh": "來自深淵",
+        "aliases": [
+          "メイドインアビス"
+        ]
+      },
+      {
+        "code": "kuma_pooh",
+        "title_jp": "くまのプーさん",
+        "title_en": "Winnie the Pooh",
+        "title_zh": "小熊維尼",
+        "aliases": [
+          "プーさん"
+        ]
+      },
+      {
+        "code": "monsters_inc",
+        "title_jp": "モンスターズ・インク",
+        "title_en": "Monsters, Inc.",
+        "title_zh": "怪獸公司",
+        "aliases": [
+          "モンスターズインク"
+        ]
+      },
+      {
+        "code": "coco",
+        "title_jp": "リメンバー・ミー",
+        "title_en": "Coco",
+        "title_zh": "玩轉極樂園",
+        "aliases": [
+          "リメンバーミー"
+        ]
+      },
+      {
+        "code": "glay",
+        "title_jp": "GLAY",
+        "title_en": "GLAY",
+        "title_zh": "GLAY",
+        "aliases": [
+          "GLAY"
+        ]
+      },
+      {
+        "code": "xstellar",
+        "title_jp": "XStellar",
+        "title_en": "XStellar",
+        "title_zh": "XStellar",
+        "aliases": [
+          "XStellar"
+        ]
+      }
+    ],
+    "category": [
+      {
+        "code": "figure",
+        "label_zh": "人形手辦",
+        "label_jp": "フィギュア"
+      },
+      {
+        "code": "plush",
+        "label_zh": "毛絨公仔",
+        "label_jp": "ぬいぐるみ"
+      },
+      {
+        "code": "mascot",
+        "label_zh": "吉祥物小物",
+        "label_jp": "マスコット"
+      },
+      {
+        "code": "goods",
+        "label_zh": "雜貨",
+        "label_jp": "雑貨・グッズ"
+      },
+      {
+        "code": "cushion",
+        "label_zh": "攬枕",
+        "label_jp": "クッション"
+      },
+      {
+        "code": "towel",
+        "label_zh": "毛巾",
+        "label_jp": "タオル"
+      },
+      {
+        "code": "tableware",
+        "label_zh": "食器",
+        "label_jp": "食器"
+      },
+      {
+        "code": "lamp",
+        "label_zh": "燈飾",
+        "label_jp": "ランプ"
+      },
+      {
+        "code": "acrylic_stand",
+        "label_zh": "亞克力立牌",
+        "label_jp": "アクリルスタンド"
+      },
+      {
+        "code": "colored_paper",
+        "label_zh": "色紙",
+        "label_jp": "色紙"
+      },
+      {
+        "code": "keychain",
+        "label_zh": "掛飾／鑰匙扣",
+        "label_jp": "キーホルダー"
+      },
+      {
+        "code": "other",
+        "label_zh": "其他",
+        "label_jp": "その他"
+      }
+    ],
+    "prize_tier": [
+      {
+        "code": "A",
+        "label_jp": "A賞",
+        "label_zh": "A賞"
+      },
+      {
+        "code": "B",
+        "label_jp": "B賞",
+        "label_zh": "B賞"
+      },
+      {
+        "code": "C",
+        "label_jp": "C賞",
+        "label_zh": "C賞"
+      },
+      {
+        "code": "D",
+        "label_jp": "D賞",
+        "label_zh": "D賞"
+      },
+      {
+        "code": "E",
+        "label_jp": "E賞",
+        "label_zh": "E賞"
+      },
+      {
+        "code": "last_one",
+        "label_jp": "ラストワン賞",
+        "label_zh": "尾賞",
+        "aliases": [
+          "尾賞",
+          "最終賞",
+          "ラストワン"
+        ]
+      }
+    ],
+    "size_bucket": [
+      {
+        "cm": 10,
+        "label": "約10cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 15,
+        "label": "約15cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 20,
+        "label": "約20cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 25,
+        "label": "約25cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 30,
+        "label": "約30cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 35,
+        "label": "約35cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 40,
+        "label": "約40cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      }
+    ],
+    "release_month": {
+      "type": "month",
+      "format": "YYYY-MM",
+      "note": "由 item.release_month 派生，唔寫死清單"
+    },
+    "condition": [
+      {
+        "code": "new",
+        "label_zh": "全新"
+      },
+      {
+        "code": "unopened",
+        "label_zh": "未拆"
+      },
+      {
+        "code": "opened",
+        "label_zh": "僅拆"
+      },
+      {
+        "code": "flawed",
+        "label_zh": "有瑕疵"
+      }
+    ],
+    "price_range": {
+      "currency": "JPY",
+      "note": "第一階段只日圓，不做港元換算"
+    }
+  },
+  "rules": {
+    "size_bucket_rule": "round(size_cm / 5) * 5",
+    "series_group_format": "純阿拉伯數字字串，例如 '2'（Ⅱ→2、03→3）",
+    "official_name_only": "只有 official_name 可以做去重／比對；raw_title 只做溯源",
+    "kuji_model": "kuji 池（is_kuji_pool=true）→ 賞品（parent_item_id + prize_tier）",
+    "privacy": {
+      "search": "前端本地運算（mv_search_index 靜態 JSON）",
+      "server_logs": "冇 query_log / user_id / session",
+      "local_only": [
+        "瀏覽記錄",
+        "收藏",
+        "最近搜尋關鍵詞（localStorage）"
+      ]
+    }
+  },
+  "excluded": {
+    "makers": [
+      {
+        "name": "Namco（バンダイナムコアミューズメント）",
+        "reason": "機台營運商，唔係景品製造商"
+      },
+      {
+        "name": "Good Smile Company",
+        "reason": "scale figure／ねんどろいど，唔做夾機景品；加入會污染 prize 定位"
+      }
+    ],
+    "ip_work": [
+      {
+        "name": "原神",
+        "reason": "日本夾機景品幾乎冇（主要中國市場），加入會拉低篩選準確度"
+      },
+      {
+        "name": "崩壞：星穹鐵道",
+        "reason": "同上，非日本 prize 主流"
+      }
+    ],
+    "note": "明確排除，唔會出現喺 filters；改 aliases.py 後重生"
+  },
+  "decisions_pending": [
+    "排行榜數據來源（A: item_view_daily 聚合 / B: 外部訊號）",
+    "廠商清單：確認移走 Namco、Good Smile；TAKARA 放その他"
+  ]
+}, items: {"_meta": {"generated_at": "2026-10-28", "generator": "pipeline/export_items.py", "source": "module2 解析 + module1 命名（真數據）", "counts": {"total": 103, "skipped": 0, "real": 103, "prize": 26, "kuji": 77}, "views_available": false, "price_available": false, "ranking_label": "熱度數據未接（等 item_view_daily）", "privacy": "搜尋／瀏覽／收藏全部喺瀏覽器本地，唔上傳伺服器", "mode": "from items.real.json"}, "items": [{"id": "itm_23829f3911", "official_name": "一番くじちょこっと 転生したらスライムだった件", "raw_title": "一番くじちょこっと 転生したらスライムだった件", "maker": "other", "brand": null, "ip": "tensura", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじちょこっと 転生したらスライムだった件", "mercari": "https://jp.mercari.com/search?keyword=一番くじちょこっと 転生したらスライムだった件", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじちょこっと 転生したらスライムだった件"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/slime23"], "is_real": true, "demo": false}, {"id": "itm_d1f102f578", "official_name": "一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA2", "raw_title": "一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA2", "maker": "other", "brand": null, "ip": "gundam", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA2", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA2", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA2"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/gundam_ucs2"], "is_real": true, "demo": false}, {"id": "itm_211c960bea", "official_name": "一番くじ FAIRY TAIL 20th ANNIV", "raw_title": "一番くじ FAIRY TAIL 20th ANNIV", "maker": "other", "brand": null, "ip": "fairytail", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ FAIRY TAIL 20th ANNIV", "mercari": "https://jp.mercari.com/search?keyword=一番くじ FAIRY TAIL 20th ANNIV", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ FAIRY TAIL 20th ANNIV"}, "source_urls": ["https://1kuji.com/products"], "is_real": true, "demo": false}, {"id": "itm_634b27c01d", "official_name": "一番くじ トイ・ストーリー ～Playtime pals～", "raw_title": "一番くじ トイ・ストーリー ～Playtime pals～", "maker": "other", "brand": null, "ip": "toy_story", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ トイ・ストーリー ～Playtime pals～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ トイ・ストーリー ～Playtime pals～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ トイ・ストーリー ～Playtime pals～"}, "source_urls": ["https://1kuji.com/products"], "is_real": true, "demo": false}, {"id": "itm_55c9d19ac7", "official_name": "一番くじ くまのプーさん 100th Anniversary", "raw_title": "一番くじ くまのプーさん 100th Anniversary", "maker": "other", "brand": null, "ip": "kuma_pooh", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ くまのプーさん 100th Anniversary", "mercari": "https://jp.mercari.com/search?keyword=一番くじ くまのプーさん 100th Anniversary", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ くまのプーさん 100th Anniversary"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/disney_pooh7"], "is_real": true, "demo": false}, {"id": "itm_9d53d899b1", "official_name": "一番くじ ウマ娘 プリティーダービー 14弾", "raw_title": "一番くじ ウマ娘 プリティーダービー 14弾", "maker": "other", "brand": null, "ip": "uma_musume", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ウマ娘 プリティーダービー 14弾", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ウマ娘 プリティーダービー 14弾", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ウマ娘 プリティーダービー 14弾"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/umamusume17"], "is_real": true, "demo": false}, {"id": "itm_27df7dbcb8", "official_name": "一番くじ ドラゴンボール SPIRIT OF THE SAIYAN", "raw_title": "一番くじ ドラゴンボール SPIRIT OF THE SAIYAN", "maker": "other", "brand": null, "ip": "dragon_ball", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ドラゴンボール SPIRIT OF THE SAIYAN", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ドラゴンボール SPIRIT OF THE SAIYAN", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ドラゴンボール SPIRIT OF THE SAIYAN"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/db_z8"], "is_real": true, "demo": false}, {"id": "itm_97bd3262bd", "official_name": "一番くじ モンスターズ・インク", "raw_title": "一番くじ モンスターズ・インク", "maker": "other", "brand": null, "ip": "monsters_inc", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ モンスターズ・インク", "mercari": "https://jp.mercari.com/search?keyword=一番くじ モンスターズ・インク", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ モンスターズ・インク"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/disney_monsters-inc"], "is_real": true, "demo": false}, {"id": "itm_12be0fad80", "official_name": "一番くじ GLAY", "raw_title": "一番くじ GLAY", "maker": "other", "brand": null, "ip": "glay", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ GLAY", "mercari": "https://jp.mercari.com/search?keyword=一番くじ GLAY", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ GLAY"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/glay"], "is_real": true, "demo": false}, {"id": "itm_845907215e", "official_name": "一番くじ キン肉マン 超人血盟軍", "raw_title": "一番くじ キン肉マン 超人血盟軍", "maker": "other", "brand": null, "ip": "ultraman", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ キン肉マン 超人血盟軍", "mercari": "https://jp.mercari.com/search?keyword=一番くじ キン肉マン 超人血盟軍", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ キン肉マン 超人血盟軍"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/kinniku3"], "is_real": true, "demo": false}, {"id": "itm_0e637a51e0", "official_name": "一番くじ ムーミン ～A day like this～", "raw_title": "一番くじ ムーミン ～A day like this～", "maker": "other", "brand": null, "ip": "moomin", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ムーミン ～A day like this～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ムーミン ～A day like this～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ムーミン ～A day like this～"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/moomin11"], "is_real": true, "demo": false}, {"id": "itm_6c7d228c95", "official_name": "一番くじ カグラバチ", "raw_title": "一番くじ カグラバチ", "maker": "other", "brand": null, "ip": "kagurabachi", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ カグラバチ", "mercari": "https://jp.mercari.com/search?keyword=一番くじ カグラバチ", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ カグラバチ"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/kagurabachi"], "is_real": true, "demo": false}, {"id": "itm_67069d1463", "official_name": "一番くじ すみっコぐらし ～もしもすみっコが進化したら～", "raw_title": "一番くじ すみっコぐらし ～もしもすみっコが進化したら～", "maker": "other", "brand": null, "ip": "sumikko", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ すみっコぐらし ～もしもすみっコが進化したら～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ すみっコぐらし ～もしもすみっコが進化したら～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ すみっコぐらし ～もしもすみっコが進化したら～"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/sumikko27"], "is_real": true, "demo": false}, {"id": "itm_c4c496413a", "official_name": "一番くじ 桜蘭高校ホスト部 20th Anniversary", "raw_title": "一番くじ 桜蘭高校ホスト部 20th Anniversary", "maker": "other", "brand": null, "ip": "ouran", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 桜蘭高校ホスト部 20th Anniversary", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 桜蘭高校ホスト部 20th Anniversary", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 桜蘭高校ホスト部 20th Anniversary"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/ouran"], "is_real": true, "demo": false}, {"id": "itm_d21ad928dc", "official_name": "一番くじ 進撃の巨人 ～心臓を捧げよ～", "raw_title": "一番くじ 進撃の巨人 ～心臓を捧げよ～", "maker": "other", "brand": null, "ip": "shingeki", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 進撃の巨人 ～心臓を捧げよ～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 進撃の巨人 ～心臓を捧げよ～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 進撃の巨人 ～心臓を捧げよ～"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/shingeki16"], "is_real": true, "demo": false}, {"id": "itm_c5f8c096c9", "official_name": "一番くじ NARUTO-ナルト- 疾風伝 飛段・角都", "raw_title": "一番くじ NARUTO-ナルト- 疾風伝 飛段・角都", "maker": "other", "brand": null, "ip": "naruto", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ NARUTO-ナルト- 疾風伝 飛段・角都", "mercari": "https://jp.mercari.com/search?keyword=一番くじ NARUTO-ナルト- 疾風伝 飛段・角都", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ NARUTO-ナルト- 疾風伝 飛段・角都"}, "source_urls": ["https://1kuji.com/products"], "is_real": true, "demo": false}, {"id": "itm_06a559504a", "official_name": "一番くじちょこっと mojojojo", "raw_title": "一番くじちょこっと mojojojo", "maker": "other", "brand": null, "ip": "jojo", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじちょこっと mojojojo", "mercari": "https://jp.mercari.com/search?keyword=一番くじちょこっと mojojojo", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじちょこっと mojojojo"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/mojojojo"], "is_real": true, "demo": false}, {"id": "itm_cc52492fb7", "official_name": "一番くじ ONE PIECE -空に奏でる島の歌声-", "raw_title": "一番くじ ONE PIECE -空に奏でる島の歌声-", "maker": "other", "brand": null, "ip": "one_piece", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ONE PIECE -空に奏でる島の歌声-", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ONE PIECE -空に奏でる島の歌声-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ONE PIECE -空に奏でる島の歌声-"}, "source_urls": ["https://1kuji.com/products"], "is_real": true, "demo": false}, {"id": "itm_6acb0e86ce", "official_name": "一番くじ お文具といっしょ ～ちっちゃくなっちゃった～", "raw_title": "一番くじ お文具といっしょ ～ちっちゃくなっちゃった～", "maker": "other", "brand": null, "ip": "obungu", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ お文具といっしょ ～ちっちゃくなっちゃった～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ お文具といっしょ ～ちっちゃくなっちゃった～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ お文具といっしょ ～ちっちゃくなっちゃった～"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/obungu6"], "is_real": true, "demo": false}, {"id": "itm_fdd8a7de31", "official_name": "一番くじ メイドインアビス", "raw_title": "一番くじ メイドインアビス", "maker": "other", "brand": null, "ip": "made_in_abyss", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ メイドインアビス", "mercari": "https://jp.mercari.com/search?keyword=一番くじ メイドインアビス", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ メイドインアビス"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/miabyss"], "is_real": true, "demo": false}, {"id": "itm_e18d28b1f0", "official_name": "一番くじ Fate/Grand Order ～カルデア～", "raw_title": "一番くじ Fate/Grand Order ～カルデア～", "maker": "other", "brand": null, "ip": "fate", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ Fate/Grand Order ～カルデア～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ Fate/Grand Order ～カルデア～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ Fate/Grand Order ～カルデア～"}, "source_urls": ["https://1kuji.com/products"], "is_real": true, "demo": false}, {"id": "itm_56aaabb050", "official_name": "一番くじ リメンバー・ミー Colorful Memories", "raw_title": "一番くじ リメンバー・ミー Colorful Memories", "maker": "other", "brand": null, "ip": "coco", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ リメンバー・ミー Colorful Memories", "mercari": "https://jp.mercari.com/search?keyword=一番くじ リメンバー・ミー Colorful Memories", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ リメンバー・ミー Colorful Memories"}, "source_urls": ["https://1kuji.com/products", "https://1kuji.com/products/disney_coco"], "is_real": true, "demo": false}, {"id": "itm_449487ab31", "official_name": "アニメ「鬼滅の刃」 XStellar ‐猗窩座‐再来", "raw_title": "アニメ「鬼滅の刃」 XStellar ‐猗窩座‐再来", "maker": "sega_fave", "brand": null, "ip": "kimetsu", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 11.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=アニメ「鬼滅の刃」 XStellar ‐猗窩座‐再来", "mercari": "https://jp.mercari.com/search?keyword=アニメ「鬼滅の刃」 XStellar ‐猗窩座‐再来", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=アニメ「鬼滅の刃」 XStellar ‐猗窩座‐再来"}, "source_urls": ["https://kore-tore.com/"], "is_real": true, "demo": false}, {"id": "itm_79df602404", "official_name": "BLEACH MAXIMATIC KISUKE URAHARA", "raw_title": "BLEACH MAXIMATIC KISUKE URAHARA", "maker": "bandai_spirits", "brand": null, "ip": "bleach", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 18.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=BLEACH MAXIMATIC KISUKE URAHARA", "mercari": "https://jp.mercari.com/search?keyword=BLEACH MAXIMATIC KISUKE URAHARA", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=BLEACH MAXIMATIC KISUKE URAHARA"}, "source_urls": ["https://kore-tore.com/", "https://kore-tore.com/bleach-maximatic-kisuke-urahara/"], "is_real": true, "demo": false}, {"id": "itm_e67c0f0686", "official_name": "TVアニメ『薬屋のひとりごと』 猫猫 フィギュア～ポンチョ～", "raw_title": "TVアニメ『薬屋のひとりごと』 猫猫 フィギュア～ポンチョ～", "maker": "bandai_spirits", "brand": null, "ip": "kusuriya", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 20.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=TVアニメ『薬屋のひとりごと』 猫猫 フィギュア～ポンチョ～", "mercari": "https://jp.mercari.com/search?keyword=TVアニメ『薬屋のひとりごと』 猫猫 フィギュア～ポンチョ～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=TVアニメ『薬屋のひとりごと』 猫猫 フィギュア～ポンチョ～"}, "source_urls": ["https://kore-tore.com/", "https://kore-tore.com/kusuriya-no-hitorigoto-maomao-poncho-figure/"], "is_real": true, "demo": false}, {"id": "itm_34c9caa80f", "official_name": "刃牙 Grandista×フィグライフッッ!! 範馬勇次郎-強くなりたくば吊るせッッ-", "raw_title": "刃牙 Grandista×フィグライフッッ!! 範馬勇次郎-強くなりたくば吊るせッッ-", "maker": "bandai_spirits", "brand": null, "ip": "baki", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 50.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=刃牙 Grandista×フィグライフッッ!! 範馬勇次郎-強くなりたくば吊るせッッ-", "mercari": "https://jp.mercari.com/search?keyword=刃牙 Grandista×フィグライフッッ!! 範馬勇次郎-強くなりたくば吊るせッッ-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=刃牙 Grandista×フィグライフッッ!! 範馬勇次郎-強くなりたくば吊るせッッ-"}, "source_urls": ["https://kore-tore.com/", "https://kore-tore.com/baki-hanmayujiro-grandista-figlife-hanger/"], "is_real": true, "demo": false}, {"id": "itm_be5ccb2944", "official_name": "僕のヒーローアカデミア THE AMAZING HEROES-IZUKU MIDORIYA-体育祭ver.", "raw_title": "僕のヒーローアカデミア THE AMAZING HEROES-IZUKU MIDORIYA-体育祭ver.", "maker": "bandai_spirits", "brand": null, "ip": "heroaca", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 17.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=僕のヒーローアカデミア THE AMAZING HEROES-IZUKU MIDORIYA-体育祭ver.", "mercari": "https://jp.mercari.com/search?keyword=僕のヒーローアカデミア THE AMAZING HEROES-IZUKU MIDORIYA-体育祭ver.", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=僕のヒーローアカデミア THE AMAZING HEROES-IZUKU MIDORIYA-体育祭ver."}, "source_urls": ["https://kore-tore.com/"], "is_real": true, "demo": false}, {"id": "itm_8cfa75df1c", "official_name": "-NARUTO 72 series- 71 VIBRATION STARS-UZUMAKI NARUTO-", "raw_title": "-NARUTO 72 series- 71 VIBRATION STARS-UZUMAKI NARUTO-", "maker": "bandai_spirits", "brand": null, "ip": "naruto", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 14.0, "series_group": "71", "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=-NARUTO 72 series- 71 VIBRATION STARS-UZUMAKI NARUTO-", "mercari": "https://jp.mercari.com/search?keyword=-NARUTO 72 series- 71 VIBRATION STARS-UZUMAKI NARUTO-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=-NARUTO 72 series- 71 VIBRATION STARS-UZUMAKI NARUTO-"}, "source_urls": ["https://kore-tore.com/", "https://kore-tore.com/naruto-uzumaki-vibration-stars/"], "is_real": true, "demo": false}, {"id": "itm_87e1309d01", "official_name": "ウマ娘 プリティーダービー Trio-Try-iT Figureーアグネスタキオンー", "raw_title": "ウマ娘 プリティーダービー Trio-Try-iT Figureーアグネスタキオンー", "maker": "furyu", "brand": null, "ip": "uma_musume", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 21.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=ウマ娘 プリティーダービー Trio-Try-iT Figureーアグネスタキオンー", "mercari": "https://jp.mercari.com/search?keyword=ウマ娘 プリティーダービー Trio-Try-iT Figureーアグネスタキオンー", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=ウマ娘 プリティーダービー Trio-Try-iT Figureーアグネスタキオンー"}, "source_urls": ["https://kore-tore.com/", "https://kore-tore.com/umamusume-agnes-tachyon-trio-try-it-figure/"], "is_real": true, "demo": false}, {"id": "itm_7200b6bc41", "official_name": "貞子 Grandista-貞子-", "raw_title": "貞子 Grandista-貞子-", "maker": "bandai_spirits", "brand": null, "ip": "sadako", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 25.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=貞子 Grandista-貞子-", "mercari": "https://jp.mercari.com/search?keyword=貞子 Grandista-貞子-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=貞子 Grandista-貞子-"}, "source_urls": ["https://kore-tore.com/"], "is_real": true, "demo": false}, {"id": "itm_df65d1e87c", "official_name": "青春ブタ野郎シリーズ Coreful フィギュア 桜島麻衣～バニーver.～", "raw_title": "青春ブタ野郎シリーズ Coreful フィギュア 桜島麻衣～バニーver.～", "maker": "taito", "brand": null, "ip": "seishun_buta", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 20.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=青春ブタ野郎シリーズ Coreful フィギュア 桜島麻衣～バニーver.～", "mercari": "https://jp.mercari.com/search?keyword=青春ブタ野郎シリーズ Coreful フィギュア 桜島麻衣～バニーver.～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=青春ブタ野郎シリーズ Coreful フィギュア 桜島麻衣～バニーver.～"}, "source_urls": ["https://kore-tore.com/"], "is_real": true, "demo": false}, {"id": "itm_542de09d78", "official_name": "アークナイツ ぬーどるストッパーフィギュアーテキサス・意志ver.ー", "raw_title": "アークナイツ ぬーどるストッパーフィギュアーテキサス・意志ver.ー", "maker": "furyu", "brand": null, "ip": "arknights", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 13.0, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=アークナイツ ぬーどるストッパーフィギュアーテキサス・意志ver.ー", "mercari": "https://jp.mercari.com/search?keyword=アークナイツ ぬーどるストッパーフィギュアーテキサス・意志ver.ー", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=アークナイツ ぬーどるストッパーフィギュアーテキサス・意志ver.ー"}, "source_urls": ["https://kore-tore.com/", "https://kore-tore.com/arknights-texas-ishiver-noodle-stopper-figure/"], "is_real": true, "demo": false}, {"id": "itm_174394a88c", "official_name": "一番くじ ホロライブ ～RPG Style～", "raw_title": "一番くじ ホロライブ ～RPG Style～", "maker": "other", "brand": null, "ip": "hololive", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ホロライブ ～RPG Style～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ホロライブ ～RPG Style～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ホロライブ ～RPG Style～"}, "source_urls": ["https://1kuji.com/products/hololive-rpg"], "is_real": true, "demo": false}, {"id": "itm_f13609b74e", "official_name": "一番くじ 〈ディズニープリンセス〉Enchanted Glow", "raw_title": "一番くじ 〈ディズニープリンセス〉Enchanted Glow", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 〈ディズニープリンセス〉Enchanted Glow", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 〈ディズニープリンセス〉Enchanted Glow", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 〈ディズニープリンセス〉Enchanted Glow"}, "source_urls": ["https://1kuji.com/products/disney_ps13"], "is_real": true, "demo": false}, {"id": "itm_539fc29ec4", "official_name": "一番くじ 僕のヒーローアカデミア -最高のヒーローになるまでの物語-", "raw_title": "一番くじ 僕のヒーローアカデミア -最高のヒーローになるまでの物語-", "maker": "other", "brand": null, "ip": "heroaca", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 僕のヒーローアカデミア -最高のヒーローになるまでの物語-", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 僕のヒーローアカデミア -最高のヒーローになるまでの物語-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 僕のヒーローアカデミア -最高のヒーローになるまでの物語-"}, "source_urls": ["https://1kuji.com/products/myhero47"], "is_real": true, "demo": false}, {"id": "itm_81041b1556", "official_name": "一番くじ 崩壊：スターレイル Vol.3", "raw_title": "一番くじ 崩壊：スターレイル Vol.3", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 崩壊：スターレイル Vol.3", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 崩壊：スターレイル Vol.3", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 崩壊：スターレイル Vol.3"}, "source_urls": ["https://1kuji.com/products/houkaistarrail3"], "is_real": true, "demo": false}, {"id": "itm_1af48331df", "official_name": "一番くじちょこっと サンエックスユニバース", "raw_title": "一番くじちょこっと サンエックスユニバース", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじちょこっと サンエックスユニバース", "mercari": "https://jp.mercari.com/search?keyword=一番くじちょこっと サンエックスユニバース", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじちょこっと サンエックスユニバース"}, "source_urls": ["https://1kuji.com/products/san-x"], "is_real": true, "demo": false}, {"id": "itm_5278b3b2db", "official_name": "一番くじ 劇場版『チェンソーマン レゼ篇』第2弾", "raw_title": "一番くじ 劇場版『チェンソーマン レゼ篇』第2弾", "maker": "other", "brand": null, "ip": "chainsaw_man", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 劇場版『チェンソーマン レゼ篇』第2弾", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 劇場版『チェンソーマン レゼ篇』第2弾", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 劇場版『チェンソーマン レゼ篇』第2弾"}, "source_urls": ["https://1kuji.com/products/chainsawman3"], "is_real": true, "demo": false}, {"id": "itm_ce51b33f84", "official_name": "一番くじ IVE FROM STARSHIP ENTERTAINMENT WITH AMUSE Vol.2", "raw_title": "一番くじ IVE FROM STARSHIP ENTERTAINMENT WITH AMUSE Vol.2", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ IVE FROM STARSHIP ENTERTAINMENT WITH AMUSE Vol.2", "mercari": "https://jp.mercari.com/search?keyword=一番くじ IVE FROM STARSHIP ENTERTAINMENT WITH AMUSE Vol.2", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ IVE FROM STARSHIP ENTERTAINMENT WITH AMUSE Vol.2"}, "source_urls": ["https://1kuji.com/products/ive2"], "is_real": true, "demo": false}, {"id": "itm_33accc8b96", "official_name": "一番くじ 学園アイドルマスター Part6", "raw_title": "一番くじ 学園アイドルマスター Part6", "maker": "other", "brand": null, "ip": "gakuen_idolmaster", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 学園アイドルマスター Part6", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 学園アイドルマスター Part6", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 学園アイドルマスター Part6"}, "source_urls": ["https://1kuji.com/products/gkmas06"], "is_real": true, "demo": false}, {"id": "itm_3fa09d2991", "official_name": "一番くじ BLEACH Stirring Souls vol.5", "raw_title": "一番くじ BLEACH Stirring Souls vol.5", "maker": "other", "brand": null, "ip": "bleach", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ BLEACH Stirring Souls vol.5", "mercari": "https://jp.mercari.com/search?keyword=一番くじ BLEACH Stirring Souls vol.5", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ BLEACH Stirring Souls vol.5"}, "source_urls": ["https://1kuji.com/products/bleach8"], "is_real": true, "demo": false}, {"id": "itm_46f13fb17b", "official_name": "一番くじ きみが死ぬまで恋をしたい", "raw_title": "一番くじ きみが死ぬまで恋をしたい", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ きみが死ぬまで恋をしたい", "mercari": "https://jp.mercari.com/search?keyword=一番くじ きみが死ぬまで恋をしたい", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ きみが死ぬまで恋をしたい"}, "source_urls": ["https://1kuji.com/products/kimishinu"], "is_real": true, "demo": false}, {"id": "itm_c6554f4bb2", "official_name": "一番くじ 幽☆遊☆白書 魔界の扉編", "raw_title": "一番くじ 幽☆遊☆白書 魔界の扉編", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 幽☆遊☆白書 魔界の扉編", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 幽☆遊☆白書 魔界の扉編", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 幽☆遊☆白書 魔界の扉編"}, "source_urls": ["https://1kuji.com/products/yuhaku4"], "is_real": true, "demo": false}, {"id": "itm_2e79658378", "official_name": "一番くじ ベルセルク 宿命の双極", "raw_title": "一番くじ ベルセルク 宿命の双極", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ベルセルク 宿命の双極", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ベルセルク 宿命の双極", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ベルセルク 宿命の双極"}, "source_urls": ["https://1kuji.com/products/berserk4"], "is_real": true, "demo": false}, {"id": "itm_314dba2590", "official_name": "一番くじ プリキュア ～Endless Grace～", "raw_title": "一番くじ プリキュア ～Endless Grace～", "maker": "other", "brand": null, "ip": "precure", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ プリキュア ～Endless Grace～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ プリキュア ～Endless Grace～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ プリキュア ～Endless Grace～"}, "source_urls": ["https://1kuji.com/products/precure5"], "is_real": true, "demo": false}, {"id": "itm_c21f350294", "official_name": "一番くじ アニメ『呪術廻戦』5周年FINAL！", "raw_title": "一番くじ アニメ『呪術廻戦』5周年FINAL！", "maker": "other", "brand": null, "ip": "jujutsu", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ アニメ『呪術廻戦』5周年FINAL！", "mercari": "https://jp.mercari.com/search?keyword=一番くじ アニメ『呪術廻戦』5周年FINAL！", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ アニメ『呪術廻戦』5周年FINAL！"}, "source_urls": ["https://1kuji.com/products/jujutsu19"], "is_real": true, "demo": false}, {"id": "itm_b4c16d893b", "official_name": "一番くじ 攻殻機動隊 THE GHOST IN THE SHELL", "raw_title": "一番くじ 攻殻機動隊 THE GHOST IN THE SHELL", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 攻殻機動隊 THE GHOST IN THE SHELL", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 攻殻機動隊 THE GHOST IN THE SHELL", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 攻殻機動隊 THE GHOST IN THE SHELL"}, "source_urls": ["https://1kuji.com/products/theghostintheshell"], "is_real": true, "demo": false}, {"id": "itm_e4428f75cf", "official_name": "一番くじちょこっと じょせまる ～ふりふり ぷりてぃ ぉいぬ～", "raw_title": "一番くじちょこっと じょせまる ～ふりふり ぷりてぃ ぉいぬ～", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじちょこっと じょせまる ～ふりふり ぷりてぃ ぉいぬ～", "mercari": "https://jp.mercari.com/search?keyword=一番くじちょこっと じょせまる ～ふりふり ぷりてぃ ぉいぬ～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじちょこっと じょせまる ～ふりふり ぷりてぃ ぉいぬ～"}, "source_urls": ["https://1kuji.com/products/josemaru"], "is_real": true, "demo": false}, {"id": "itm_fdd0ac9d7c", "official_name": "一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～", "raw_title": "一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～", "maker": "other", "brand": null, "ip": "toy_story", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～"}, "source_urls": ["https://1kuji.com/products/disney_toy8"], "is_real": true, "demo": false}, {"id": "itm_f8ea86201e", "official_name": "一番くじ FAIRY TAIL 20th ANNIVERSARY", "raw_title": "一番くじ FAIRY TAIL 20th ANNIVERSARY", "maker": "other", "brand": null, "ip": "fairytail", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ FAIRY TAIL 20th ANNIVERSARY", "mercari": "https://jp.mercari.com/search?keyword=一番くじ FAIRY TAIL 20th ANNIVERSARY", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ FAIRY TAIL 20th ANNIVERSARY"}, "source_urls": ["https://1kuji.com/products/fairytail"], "is_real": true, "demo": false}, {"id": "itm_08c11de438", "official_name": "一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～（再販売）", "raw_title": "一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～（再販売）", "maker": "other", "brand": null, "ip": "toy_story", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～（再販売）", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～（再販売）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 〈トイ・ストーリー〉～Playtime pals forever（遊び仲間は永遠に）～（再販売）"}, "source_urls": ["https://1kuji.com/products/disney_toy8-2"], "is_real": true, "demo": false}, {"id": "itm_0b7d048aaf", "official_name": "一番くじ NARUTO-ナルト- 疾風伝 飛段・角都編", "raw_title": "一番くじ NARUTO-ナルト- 疾風伝 飛段・角都編", "maker": "other", "brand": null, "ip": "naruto", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ NARUTO-ナルト- 疾風伝 飛段・角都編", "mercari": "https://jp.mercari.com/search?keyword=一番くじ NARUTO-ナルト- 疾風伝 飛段・角都編", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ NARUTO-ナルト- 疾風伝 飛段・角都編"}, "source_urls": ["https://1kuji.com/products/naruto11"], "is_real": true, "demo": false}, {"id": "itm_206c51a23b", "official_name": "一番くじ ONE PIECE -空に奏でる\"島の歌声\"（ラブ・ソング）-", "raw_title": "一番くじ ONE PIECE -空に奏でる\"島の歌声\"（ラブ・ソング）-", "maker": "other", "brand": null, "ip": "one_piece", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ONE PIECE -空に奏でる\"島の歌声\"（ラブ・ソング）-", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ONE PIECE -空に奏でる\"島の歌声\"（ラブ・ソング）-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ONE PIECE -空に奏でる\"島の歌声\"（ラブ・ソング）-"}, "source_urls": ["https://1kuji.com/products/onep_o12"], "is_real": true, "demo": false}, {"id": "itm_dfc4fa001c", "official_name": "一番くじ Fate/Grand Order 〜カルデアピックアップメモリー〜", "raw_title": "一番くじ Fate/Grand Order 〜カルデアピックアップメモリー〜", "maker": "other", "brand": null, "ip": "fate", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ Fate/Grand Order 〜カルデアピックアップメモリー〜", "mercari": "https://jp.mercari.com/search?keyword=一番くじ Fate/Grand Order 〜カルデアピックアップメモリー〜", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ Fate/Grand Order 〜カルデアピックアップメモリー〜"}, "source_urls": ["https://1kuji.com/products/fate29"], "is_real": true, "demo": false}, {"id": "itm_7c6d75e499", "official_name": "一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA INTERLUDE", "raw_title": "一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA INTERLUDE", "maker": "other", "brand": null, "ip": "gundam", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA INTERLUDE", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA INTERLUDE", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 機動戦士ガンダム UNIVERSAL CENTURY SAGA INTERLUDE"}, "source_urls": ["https://1kuji.com/products/gundam_ucsi"], "is_real": true, "demo": false}, {"id": "itm_f6eba03e9e", "official_name": "一番くじ アニメ カードキャプターさくら クリアカード編～Blessed collection～", "raw_title": "一番くじ アニメ カードキャプターさくら クリアカード編～Blessed collection～", "maker": "other", "brand": null, "ip": "cardcaptor", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ アニメ カードキャプターさくら クリアカード編～Blessed collection～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ アニメ カードキャプターさくら クリアカード編～Blessed collection～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ アニメ カードキャプターさくら クリアカード編～Blessed collection～"}, "source_urls": ["https://1kuji.com/products/sakura15"], "is_real": true, "demo": false}, {"id": "itm_69403ef74d", "official_name": "一番くじ エスターバニー -ROMANCE ANGEL-", "raw_title": "一番くじ エスターバニー -ROMANCE ANGEL-", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ エスターバニー -ROMANCE ANGEL-", "mercari": "https://jp.mercari.com/search?keyword=一番くじ エスターバニー -ROMANCE ANGEL-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ エスターバニー -ROMANCE ANGEL-"}, "source_urls": ["https://1kuji.com/products/estherbunny"], "is_real": true, "demo": false}, {"id": "itm_083ebe265e", "official_name": "一番くじ ストリートファイター ～俺より強い奴に会いに行く～", "raw_title": "一番くじ ストリートファイター ～俺より強い奴に会いに行く～", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ストリートファイター ～俺より強い奴に会いに行く～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ストリートファイター ～俺より強い奴に会いに行く～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ストリートファイター ～俺より強い奴に会いに行く～"}, "source_urls": ["https://1kuji.com/products/streetfighter3"], "is_real": true, "demo": false}, {"id": "itm_a88499955f", "official_name": "一番くじ hololive FLOW GLOW", "raw_title": "一番くじ hololive FLOW GLOW", "maker": "other", "brand": null, "ip": "hololive", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ hololive FLOW GLOW", "mercari": "https://jp.mercari.com/search?keyword=一番くじ hololive FLOW GLOW", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ hololive FLOW GLOW"}, "source_urls": ["https://1kuji.com/products/hololive-flowglow"], "is_real": true, "demo": false}, {"id": "itm_146ce89b73", "official_name": "一番くじ ゴジラ 怪獣乱舞-ゼロの鼓動-", "raw_title": "一番くじ ゴジラ 怪獣乱舞-ゼロの鼓動-", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ゴジラ 怪獣乱舞-ゼロの鼓動-", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ゴジラ 怪獣乱舞-ゼロの鼓動-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ゴジラ 怪獣乱舞-ゼロの鼓動-"}, "source_urls": ["https://1kuji.com/products/godzilla10"], "is_real": true, "demo": false}, {"id": "itm_fd112ff68b", "official_name": "一番くじ ワンピース～あにまる大集合！～", "raw_title": "一番くじ ワンピース～あにまる大集合！～", "maker": "other", "brand": null, "ip": "one_piece", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ワンピース～あにまる大集合！～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ワンピース～あにまる大集合！～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ワンピース～あにまる大集合！～"}, "source_urls": ["https://1kuji.com/products/onep105"], "is_real": true, "demo": false}, {"id": "itm_b94e50c78e", "official_name": "一番くじ HUNTER×HUNTER CHMERA ANT ②（再販売）", "raw_title": "一番くじ HUNTER×HUNTER CHMERA ANT ②（再販売）", "maker": "other", "brand": null, "ip": "hunter", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ HUNTER×HUNTER CHMERA ANT ②（再販売）", "mercari": "https://jp.mercari.com/search?keyword=一番くじ HUNTER×HUNTER CHMERA ANT ②（再販売）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ HUNTER×HUNTER CHMERA ANT ②（再販売）"}, "source_urls": ["https://1kuji.com/products/hxh8_2"], "is_real": true, "demo": false}, {"id": "itm_f26c06c8f0", "official_name": "一番くじ To LOVEる-とらぶる-ダークネス", "raw_title": "一番くじ To LOVEる-とらぶる-ダークネス", "maker": "other", "brand": null, "ip": "to_love_ru", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ To LOVEる-とらぶる-ダークネス", "mercari": "https://jp.mercari.com/search?keyword=一番くじ To LOVEる-とらぶる-ダークネス", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ To LOVEる-とらぶる-ダークネス"}, "source_urls": ["https://1kuji.com/products/toloveru_d"], "is_real": true, "demo": false}, {"id": "itm_10c97885ea", "official_name": "一番くじちょこっと ホイッピ＆ラッピ", "raw_title": "一番くじちょこっと ホイッピ＆ラッピ", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじちょこっと ホイッピ＆ラッピ", "mercari": "https://jp.mercari.com/search?keyword=一番くじちょこっと ホイッピ＆ラッピ", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじちょこっと ホイッピ＆ラッピ"}, "source_urls": ["https://1kuji.com/products/whippi_wrappi"], "is_real": true, "demo": false}, {"id": "itm_5dbdc0e26c", "official_name": "一番くじ にゃんこ大戦争 ～みんなでペリペリするにゃ～（再販売）", "raw_title": "一番くじ にゃんこ大戦争 ～みんなでペリペリするにゃ～（再販売）", "maker": "other", "brand": null, "ip": "nyanko", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ にゃんこ大戦争 ～みんなでペリペリするにゃ～（再販売）", "mercari": "https://jp.mercari.com/search?keyword=一番くじ にゃんこ大戦争 ～みんなでペリペリするにゃ～（再販売）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ にゃんこ大戦争 ～みんなでペリペリするにゃ～（再販売）"}, "source_urls": ["https://1kuji.com/products/battlecats2-2"], "is_real": true, "demo": false}, {"id": "itm_3991e496cb", "official_name": "一番くじ たまごっち（仮）", "raw_title": "一番くじ たまごっち（仮）", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ たまごっち（仮）", "mercari": "https://jp.mercari.com/search?keyword=一番くじ たまごっち（仮）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ たまごっち（仮）"}, "source_urls": ["https://1kuji.com/products/tamagotchi6"], "is_real": true, "demo": false}, {"id": "itm_42571b9f21", "official_name": "一番くじ ジョジョの奇妙な冒険 The Gathering of RIVALS", "raw_title": "一番くじ ジョジョの奇妙な冒険 The Gathering of RIVALS", "maker": "other", "brand": null, "ip": "jojo", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ジョジョの奇妙な冒険 The Gathering of RIVALS", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ジョジョの奇妙な冒険 The Gathering of RIVALS", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ジョジョの奇妙な冒険 The Gathering of RIVALS"}, "source_urls": ["https://1kuji.com/products/jojo_26"], "is_real": true, "demo": false}, {"id": "itm_ef04561204", "official_name": "一番くじ 仮面ライダーマイス＆仮面ライダーゼッツ", "raw_title": "一番くじ 仮面ライダーマイス＆仮面ライダーゼッツ", "maker": "other", "brand": null, "ip": "kamen_rider", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 仮面ライダーマイス＆仮面ライダーゼッツ", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 仮面ライダーマイス＆仮面ライダーゼッツ", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 仮面ライダーマイス＆仮面ライダーゼッツ"}, "source_urls": ["https://1kuji.com/products/rider_zeztz"], "is_real": true, "demo": false}, {"id": "itm_354914e995", "official_name": "一番くじ 『ペルソナ』シリーズ30th ANNIVERSARY", "raw_title": "一番くじ 『ペルソナ』シリーズ30th ANNIVERSARY", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 『ペルソナ』シリーズ30th ANNIVERSARY", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 『ペルソナ』シリーズ30th ANNIVERSARY", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 『ペルソナ』シリーズ30th ANNIVERSARY"}, "source_urls": ["https://1kuji.com/products/persona_30th"], "is_real": true, "demo": false}, {"id": "itm_bdca99b68f", "official_name": "一番くじ ドラゴンボール Fantastic Adventure 3", "raw_title": "一番くじ ドラゴンボール Fantastic Adventure 3", "maker": "other", "brand": null, "ip": "dragon_ball", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ドラゴンボール Fantastic Adventure 3", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ドラゴンボール Fantastic Adventure 3", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ドラゴンボール Fantastic Adventure 3"}, "source_urls": ["https://1kuji.com/products/db_fa3"], "is_real": true, "demo": false}, {"id": "itm_2b650850bc", "official_name": "一番くじ 僕のヒーローアカデミア -彼女たちの物語-", "raw_title": "一番くじ 僕のヒーローアカデミア -彼女たちの物語-", "maker": "other", "brand": null, "ip": "heroaca", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 僕のヒーローアカデミア -彼女たちの物語-", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 僕のヒーローアカデミア -彼女たちの物語-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 僕のヒーローアカデミア -彼女たちの物語-"}, "source_urls": ["https://1kuji.com/products/myhero48"], "is_real": true, "demo": false}, {"id": "itm_9401939330", "official_name": "一番くじ 『劇場版 薬屋のひとりごと 亡妃の秘宝』", "raw_title": "一番くじ 『劇場版 薬屋のひとりごと 亡妃の秘宝』", "maker": "other", "brand": null, "ip": "kusuriya", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 『劇場版 薬屋のひとりごと 亡妃の秘宝』", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 『劇場版 薬屋のひとりごと 亡妃の秘宝』", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 『劇場版 薬屋のひとりごと 亡妃の秘宝』"}, "source_urls": ["https://1kuji.com/products/kusuriya2"], "is_real": true, "demo": false}, {"id": "itm_c4d1e2dd61", "official_name": "一番くじ ヱヴァンゲリヲン新劇場版：破", "raw_title": "一番くじ ヱヴァンゲリヲン新劇場版：破", "maker": "other", "brand": null, "ip": "evangelion", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ヱヴァンゲリヲン新劇場版：破", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ヱヴァンゲリヲン新劇場版：破", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ヱヴァンゲリヲン新劇場版：破"}, "source_urls": ["https://1kuji.com/products/eva20"], "is_real": true, "demo": false}, {"id": "itm_c9abe791d6", "official_name": "一番くじちょこっと アイカツ！アンコール～めざせ☆最高のステージ！～", "raw_title": "一番くじちょこっと アイカツ！アンコール～めざせ☆最高のステージ！～", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじちょこっと アイカツ！アンコール～めざせ☆最高のステージ！～", "mercari": "https://jp.mercari.com/search?keyword=一番くじちょこっと アイカツ！アンコール～めざせ☆最高のステージ！～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじちょこっと アイカツ！アンコール～めざせ☆最高のステージ！～"}, "source_urls": ["https://1kuji.com/products/aikatsu8"], "is_real": true, "demo": false}, {"id": "itm_3289bcd185", "official_name": "一番くじ 学園アイドルマスター Part7", "raw_title": "一番くじ 学園アイドルマスター Part7", "maker": "other", "brand": null, "ip": "gakuen_idolmaster", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 学園アイドルマスター Part7", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 学園アイドルマスター Part7", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 学園アイドルマスター Part7"}, "source_urls": ["https://1kuji.com/products/gkmas07"], "is_real": true, "demo": false}, {"id": "itm_1bb8caa836", "official_name": "一番くじ 金色のガッシュ！！", "raw_title": "一番くじ 金色のガッシュ！！", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 金色のガッシュ！！", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 金色のガッシュ！！", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 金色のガッシュ！！"}, "source_urls": ["https://1kuji.com/products/konjiki-no-gash"], "is_real": true, "demo": false}, {"id": "itm_a2913455e8", "official_name": "一番くじ Pokémon 30th ANNIVERSARY vol.1（再販売）", "raw_title": "一番くじ Pokémon 30th ANNIVERSARY vol.1（再販売）", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ Pokémon 30th ANNIVERSARY vol.1（再販売）", "mercari": "https://jp.mercari.com/search?keyword=一番くじ Pokémon 30th ANNIVERSARY vol.1（再販売）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ Pokémon 30th ANNIVERSARY vol.1（再販売）"}, "source_urls": ["https://1kuji.com/products/pk30th_1-2"], "is_real": true, "demo": false}, {"id": "itm_665dd1db45", "official_name": "一番くじ 生徒会にも穴はある!", "raw_title": "一番くじ 生徒会にも穴はある!", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 生徒会にも穴はある!", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 生徒会にも穴はある!", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 生徒会にも穴はある!"}, "source_urls": ["https://1kuji.com/products/seitokainoana"], "is_real": true, "demo": false}, {"id": "itm_250e2da5ca", "official_name": "一番くじ TVアニメ「らんま1/2」 ～中華コレクション～", "raw_title": "一番くじ TVアニメ「らんま1/2」 ～中華コレクション～", "maker": "other", "brand": null, "ip": "ranma", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ TVアニメ「らんま1/2」 ～中華コレクション～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ TVアニメ「らんま1/2」 ～中華コレクション～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ TVアニメ「らんま1/2」 ～中華コレクション～"}, "source_urls": ["https://1kuji.com/products/ranma3"], "is_real": true, "demo": false}, {"id": "itm_373c31dc5c", "official_name": "一番くじ サラブレッド 第1R", "raw_title": "一番くじ サラブレッド 第1R", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ サラブレッド 第1R", "mercari": "https://jp.mercari.com/search?keyword=一番くじ サラブレッド 第1R", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ サラブレッド 第1R"}, "source_urls": ["https://1kuji.com/products/jra"], "is_real": true, "demo": false}, {"id": "itm_280a8ddb14", "official_name": "一番くじ 〈トイ・ストーリー〉Toys' Glorious Memories", "raw_title": "一番くじ 〈トイ・ストーリー〉Toys' Glorious Memories", "maker": "other", "brand": null, "ip": "toy_story", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 〈トイ・ストーリー〉Toys' Glorious Memories", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 〈トイ・ストーリー〉Toys' Glorious Memories", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 〈トイ・ストーリー〉Toys' Glorious Memories"}, "source_urls": ["https://1kuji.com/products/disney_toy9"], "is_real": true, "demo": false}, {"id": "itm_cbd3863b8a", "official_name": "一番くじ Mrs. GREEN APPLE ～SCENT OF WINTER～", "raw_title": "一番くじ Mrs. GREEN APPLE ～SCENT OF WINTER～", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ Mrs. GREEN APPLE ～SCENT OF WINTER～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ Mrs. GREEN APPLE ～SCENT OF WINTER～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ Mrs. GREEN APPLE ～SCENT OF WINTER～"}, "source_urls": ["https://1kuji.com/products/mrsgreenapple4"], "is_real": true, "demo": false}, {"id": "itm_91fb753216", "official_name": "一番くじ 新テニスの王子様 -オレは上に行くよ-", "raw_title": "一番くじ 新テニスの王子様 -オレは上に行くよ-", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ 新テニスの王子様 -オレは上に行くよ-", "mercari": "https://jp.mercari.com/search?keyword=一番くじ 新テニスの王子様 -オレは上に行くよ-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ 新テニスの王子様 -オレは上に行くよ-"}, "source_urls": ["https://1kuji.com/products/tenipuri4"], "is_real": true, "demo": false}, {"id": "itm_d7e125bdf7", "official_name": "一番くじ Pokémon 30th ANNIVERSARY vol.2（再販売）", "raw_title": "一番くじ Pokémon 30th ANNIVERSARY vol.2（再販売）", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ Pokémon 30th ANNIVERSARY vol.2（再販売）", "mercari": "https://jp.mercari.com/search?keyword=一番くじ Pokémon 30th ANNIVERSARY vol.2（再販売）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ Pokémon 30th ANNIVERSARY vol.2（再販売）"}, "source_urls": ["https://1kuji.com/products/pk30th_2-2"], "is_real": true, "demo": false}, {"id": "itm_3fa430c928", "official_name": "一番くじ ブルーアーカイブ vol.4", "raw_title": "一番くじ ブルーアーカイブ vol.4", "maker": "other", "brand": null, "ip": "blue_archive", "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ ブルーアーカイブ vol.4", "mercari": "https://jp.mercari.com/search?keyword=一番くじ ブルーアーカイブ vol.4", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ ブルーアーカイブ vol.4"}, "source_urls": ["https://1kuji.com/products/bluearchive4"], "is_real": true, "demo": false}, {"id": "itm_8495aa1512", "official_name": "一番くじ Harry Potter ～Welcome to Hogwarts～", "raw_title": "一番くじ Harry Potter ～Welcome to Hogwarts～", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番くじ Harry Potter ～Welcome to Hogwarts～", "mercari": "https://jp.mercari.com/search?keyword=一番くじ Harry Potter ～Welcome to Hogwarts～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番くじ Harry Potter ～Welcome to Hogwarts～"}, "source_urls": ["https://1kuji.com/products/harrypotter6"], "is_real": true, "demo": false}, {"id": "itm_b37bf82b76", "official_name": "一番コフレ Lil ala mode ～Black Ribbon Collection～", "raw_title": "一番コフレ Lil ala mode ～Black Ribbon Collection～", "maker": "other", "brand": null, "ip": null, "characters": [], "channel": "ichiban_kuji", "category": "figure", "release_month": "", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": true, "prize_tier": null, "status": "announced", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=一番コフレ Lil ala mode ～Black Ribbon Collection～", "mercari": "https://jp.mercari.com/search?keyword=一番コフレ Lil ala mode ～Black Ribbon Collection～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=一番コフレ Lil ala mode ～Black Ribbon Collection～"}, "source_urls": ["https://1kuji.com/products/lilalamode2"], "is_real": true, "demo": false}, {"id": "itm_7ad7d6a2f2", "official_name": "HUNTER×HUNTER ぬーどるストッパーフィギュアーイルミー", "raw_title": "【HUNTER×HUNTER】イルミのぬーどるストッパーフィギュアがオンクレに登場！独特で不気味な佇まいに注目！【プライズ】", "maker": "furyu", "brand": null, "ip": "hunter", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 15, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=HUNTER×HUNTER ぬーどるストッパーフィギュアーイルミー", "mercari": "https://jp.mercari.com/search?keyword=HUNTER×HUNTER ぬーどるストッパーフィギュアーイルミー", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=HUNTER×HUNTER ぬーどるストッパーフィギュアーイルミー"}, "source_urls": ["https://kore-tore.com/hunter-hunter-ilumi-noodle-stopper-figure/"], "is_real": true, "demo": false}, {"id": "itm_d79ddceaf2", "official_name": "けいおん！ BiCute Dark Figureー平沢唯ー", "raw_title": "【けいおん！】平沢唯が小悪魔風の衣装フィギュアとしてオンクレに登場！ウインク姿がたまらない！【プライズ】", "maker": "furyu", "brand": null, "ip": "k_on", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 23, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=けいおん！ BiCute Dark Figureー平沢唯ー", "mercari": "https://jp.mercari.com/search?keyword=けいおん！ BiCute Dark Figureー平沢唯ー", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=けいおん！ BiCute Dark Figureー平沢唯ー"}, "source_urls": ["https://kore-tore.com/keion-hirasawa-yui-bicute-dark-figure/"], "is_real": true, "demo": false}, {"id": "itm_c44f0851ba", "official_name": "ズートピア ミルキーボア フロッキーフィギュア〜ニック / ジュディ〜", "raw_title": "【ズートピア】ニックとジュディのフィギュアがオンクレに登場！ふわふわフロッキーとお座り姿が魅力的！【プライズ】", "maker": "furyu", "brand": null, "ip": "zootopia", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 12, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=ズートピア ミルキーボア フロッキーフィギュア〜ニック / ジュディ〜", "mercari": "https://jp.mercari.com/search?keyword=ズートピア ミルキーボア フロッキーフィギュア〜ニック / ジュディ〜", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=ズートピア ミルキーボア フロッキーフィギュア〜ニック / ジュディ〜"}, "source_urls": ["https://kore-tore.com/zootopia-nick-judy-milky-boa-flocky-figure/"], "is_real": true, "demo": false}, {"id": "itm_a5dd9b8659", "official_name": "アオのハコ ビッグジオラマアクリルフィギュア", "raw_title": "【アオのハコ】大喜、千夏たち全5種のビッグジオラマアクリルフィギュアがオンクレに！美麗イラストを立体的に飾れる！【プライズ】", "maker": "other", "brand": null, "ip": "ao_no_hako", "characters": [], "channel": "prize", "category": "goods", "release_month": "2026-10", "size_cm": null, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=アオのハコ ビッグジオラマアクリルフィギュア", "mercari": "https://jp.mercari.com/search?keyword=アオのハコ ビッグジオラマアクリルフィギュア", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=アオのハコ ビッグジオラマアクリルフィギュア"}, "source_urls": ["https://kore-tore.com/ao-no-hako-big-diorama-acrylic-figure/"], "is_real": true, "demo": false}, {"id": "itm_7cb08258be", "official_name": "ウマ娘 プリティーダービー Trio-Try-iT Figureーマンハッタンカフェー", "raw_title": "【ウマ娘】シックな装いのマンハッタンカフェのTrio-Try-iTフィギュアがオンクレに登場！【プライズ】", "maker": "furyu", "brand": null, "ip": "uma_musume", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 21, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=ウマ娘 プリティーダービー Trio-Try-iT Figureーマンハッタンカフェー", "mercari": "https://jp.mercari.com/search?keyword=ウマ娘 プリティーダービー Trio-Try-iT Figureーマンハッタンカフェー", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=ウマ娘 プリティーダービー Trio-Try-iT Figureーマンハッタンカフェー"}, "source_urls": ["https://kore-tore.com/umamusume-manhattancafe-trio-try-it-figure/"], "is_real": true, "demo": false}, {"id": "itm_46be6486bf", "official_name": "-NARUTO 72 series- 71 VIBRATION STARS-HARUNO SAKURA-", "raw_title": "【ナルト】カグヤ戦での春野サクラのプライズフィギュアがNARUTO 72 seriesよりオンクレに登場！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "naruto", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 22, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=-NARUTO 72 series- 71 VIBRATION STARS-HARUNO SAKURA-", "mercari": "https://jp.mercari.com/search?keyword=-NARUTO 72 series- 71 VIBRATION STARS-HARUNO SAKURA-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=-NARUTO 72 series- 71 VIBRATION STARS-HARUNO SAKURA-"}, "source_urls": ["https://kore-tore.com/naruto-haruno-sakura-vibration-stars-figure-2/"], "is_real": true, "demo": false}, {"id": "itm_c6e0c99182", "official_name": "-NARUTO 72 series- 71 VIBRATION STARS-UCHIHA SASUKE-", "raw_title": "【ナルト】うちはサスケのプライズフィギュアがNARUTO 72 seriesよりオンクレに登場！鋭い眼光が映える迫力のアクション造形！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "naruto", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 21, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=-NARUTO 72 series- 71 VIBRATION STARS-UCHIHA SASUKE-", "mercari": "https://jp.mercari.com/search?keyword=-NARUTO 72 series- 71 VIBRATION STARS-UCHIHA SASUKE-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=-NARUTO 72 series- 71 VIBRATION STARS-UCHIHA SASUKE-"}, "source_urls": ["https://kore-tore.com/naruto-uchiha-sasuke-vibration-stars-figure-2/"], "is_real": true, "demo": false}, {"id": "itm_655a4741f0", "official_name": "エスターバニー Fluffy Puffy vol.2", "raw_title": "【エスターバニー】クリームバニー&ローズバニーのFluffy Puffyフィギュア第2弾がオンクレに！写真を撮る和やかなシーンに注目！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": null, "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 8, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=エスターバニー Fluffy Puffy vol.2", "mercari": "https://jp.mercari.com/search?keyword=エスターバニー Fluffy Puffy vol.2", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=エスターバニー Fluffy Puffy vol.2"}, "source_urls": ["https://kore-tore.com/esther-bunny-fluffy-puffy-vol2/"], "is_real": true, "demo": false}, {"id": "itm_7b75bca7e2", "official_name": "薬屋のひとりごと 猫猫 フィギュア～毒味～", "raw_title": "【薬屋のひとりごと】毒味中でうっとりとする猫猫のプライズフィギュアがオンクレに登場！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "kusuriya", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 20, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=薬屋のひとりごと 猫猫 フィギュア～毒味～", "mercari": "https://jp.mercari.com/search?keyword=薬屋のひとりごと 猫猫 フィギュア～毒味～", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=薬屋のひとりごと 猫猫 フィギュア～毒味～"}, "source_urls": ["https://kore-tore.com/kusuriya-no-hitorigoto-maomao-dokumi-figure/"], "is_real": true, "demo": false}, {"id": "itm_9045cae598", "official_name": "To LOVEる－とらぶる－ダークネス Trio-Try-iT Figure―モモ・ベリア・デビルーク―", "raw_title": "【To LOVEる-とらぶる-】モモの水着フィギュアがオンクレに登場！小悪魔っぽい仕草が可愛い！【プライズ】", "maker": "furyu", "brand": null, "ip": "to_love_ru", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 19, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=To LOVEる－とらぶる－ダークネス Trio-Try-iT Figure―モモ・ベリア・デビルーク―", "mercari": "https://jp.mercari.com/search?keyword=To LOVEる－とらぶる－ダークネス Trio-Try-iT Figure―モモ・ベリア・デビルーク―", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=To LOVEる－とらぶる－ダークネス Trio-Try-iT Figure―モモ・ベリア・デビルーク―"}, "source_urls": ["https://kore-tore.com/to-loveru-darkness-momo-figure/"], "is_real": true, "demo": false}, {"id": "itm_ed3f256eb4", "official_name": "BLEACH GLITTER&GLAMOURS-YORUICHI SHIHOIN-", "raw_title": "【BLEACH】四楓院夜一のGLITTER&GLAMOURSフィギュアがオンクレに！マント着脱可能で美しい艶感に注目！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "bleach", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 24, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=BLEACH GLITTER&GLAMOURS-YORUICHI SHIHOIN-", "mercari": "https://jp.mercari.com/search?keyword=BLEACH GLITTER&GLAMOURS-YORUICHI SHIHOIN-", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=BLEACH GLITTER&GLAMOURS-YORUICHI SHIHOIN-"}, "source_urls": ["https://kore-tore.com/bleach-yoruichi-shihouin-glitter-glamours/"], "is_real": true, "demo": false}, {"id": "itm_be03bd3560", "official_name": "アオのハコ 鹿野千夏 フィギュア スポーツウェアver.", "raw_title": "【アオのハコ】バスケ練習中の鹿野千夏のプライズフィギュアがオンクレに登場！彼女の柔らかな笑顔に注目！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "ao_no_hako", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 23, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=アオのハコ 鹿野千夏 フィギュア スポーツウェアver.", "mercari": "https://jp.mercari.com/search?keyword=アオのハコ 鹿野千夏 フィギュア スポーツウェアver.", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=アオのハコ 鹿野千夏 フィギュア スポーツウェアver."}, "source_urls": ["https://kore-tore.com/ao-no-hako-kano-chinatsu-figure-sportswear/"], "is_real": true, "demo": false}, {"id": "itm_cc4cdc9b88", "official_name": "ドラゴンボールGT フィギュアキーホルダーvol.3", "raw_title": "【ドラゴンボールGT】超サイヤ人4になったゴジータたち3人のフィギュアキーホルダーがオンクレに登場！必殺技を放つ約5cmの迫力に注目！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "dragon_ball", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 5, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=ドラゴンボールGT フィギュアキーホルダーvol.3", "mercari": "https://jp.mercari.com/search?keyword=ドラゴンボールGT フィギュアキーホルダーvol.3", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=ドラゴンボールGT フィギュアキーホルダーvol.3"}, "source_urls": ["https://kore-tore.com/dragonball-gt-figure-keyholder-vol3/"], "is_real": true, "demo": false}, {"id": "itm_398d800000", "official_name": "ドラゴンボール超 MATCH MAKERS ベジット（VS合体ザマス）", "raw_title": "【ドラゴンボール】ベジットのMATCH MAKERSフィギュアがオンクレに登場！迫力のポージングで合体ザマスとの激闘が蘇る！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "dragon_ball", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 15, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=ドラゴンボール超 MATCH MAKERS ベジット（VS合体ザマス）", "mercari": "https://jp.mercari.com/search?keyword=ドラゴンボール超 MATCH MAKERS ベジット（VS合体ザマス）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=ドラゴンボール超 MATCH MAKERS ベジット（VS合体ザマス）"}, "source_urls": ["https://kore-tore.com/dragonball-vegito-match-makers-figure/"], "is_real": true, "demo": false}, {"id": "itm_cf87bc7578", "official_name": "ドラゴンボール超 MATCH MAKERS 合体ザマス（VSベジット）", "raw_title": "【ドラゴンボール】合体ザマスのMATCH MAKERSフィギュアがオンクレに！超サイヤ人ベジットとの激闘を再現！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "dragon_ball", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 23, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=ドラゴンボール超 MATCH MAKERS 合体ザマス（VSベジット）", "mercari": "https://jp.mercari.com/search?keyword=ドラゴンボール超 MATCH MAKERS 合体ザマス（VSベジット）", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=ドラゴンボール超 MATCH MAKERS 合体ザマス（VSベジット）"}, "source_urls": ["https://kore-tore.com/dragonball-gattai-zamasu-match-makers/"], "is_real": true, "demo": false}, {"id": "itm_2db89f88f3", "official_name": "学園アイドルマスター ESPRESTO-Fan out-秦谷美鈴", "raw_title": "【学マス】秦谷美鈴のESPRESTOフィギュアがオンクレに！「初」衣装で立体化されたバンプレスト初のフィギュア！【プライズ】", "maker": "bandai_spirits", "brand": null, "ip": "gakuen_idolmaster", "characters": [], "channel": "prize", "category": "figure", "release_month": "2026-10", "size_cm": 22, "series_group": null, "is_resale": false, "is_kuji_pool": false, "prize_tier": null, "status": "on_sale", "views_7d": 0, "price": null, "market_links": {"surugaya": "https://www.suruga-ya.jp/search?search_word=学園アイドルマスター ESPRESTO-Fan out-秦谷美鈴", "mercari": "https://jp.mercari.com/search?keyword=学園アイドルマスター ESPRESTO-Fan out-秦谷美鈴", "yahoo": "https://auctions.yahoo.co.jp/search/search?p=学園アイドルマスター ESPRESTO-Fan out-秦谷美鈴"}, "source_urls": ["https://kore-tore.com/gakuen-idolmaster-hataya-misuzu-figure/"], "is_real": true, "demo": false}], "preview": [], "skipped": []}};
+</script>
+<script>
+/* 景品情報索引 — 前端 MVP（純靜態，零後端）
+ * 私隱：所有搜尋／篩選／排序喺記憶體完成；收藏、瀏覽記錄、最近搜尋只寫 localStorage。
+ * 數據：taxonomy.json（分類樹）+ items.json（示範索引）。standalone.html 會內聯。
+ */
+(() => {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  // ------------------------------------------------------------ 正規化（鏡像 module1）
+  const ZEN = (() => {
+    const m = {};
+    for (let i = 0; i < 94; i++) m[String.fromCharCode(0xff01 + i)] = String.fromCharCode(0x21 + i);
+    return m;
+  })();
+  const DECOR = new Set(' 　【】[]（）()「」『』・･-–—_/／:：!！?？★☆♪♡♥、,，.。~〜'.split(''));
+
+  function norm(s) {
+    if (!s) return '';
+    let t = '';
+    for (const ch of String(s)) t += (ZEN[ch] || ch);
+    t = t.toLowerCase().replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 96));
+    t = Array.from(t).map(c => (DECOR.has(c) ? ' ' : c)).join('');
+    return t.replace(/\s+/g, ' ').trim();
+  }
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // ------------------------------------------------------------ localStorage
+  const LS = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* 私隱模式等 */ } },
+    del(k) { try { localStorage.removeItem(k); } catch {} },
+  };
+  const K = { fav: 'pi.favs', hist: 'pi.history', q: 'pi.recentQ', view: 'pi.view', filt: 'pi.filters' };
+
+  // ------------------------------------------------------------ 狀態
+  const state = {
+    tax: null, payload: null, items: [], preview: [],
+    q: '', channel: 'all', view: LS.get(K.view, 'player'), sort: 'relevance',
+    filters: { maker: new Set(), brand: new Set(), ip: new Set(), category: new Set(), tier: new Set(), size: new Set(), month: new Set(), status: new Set() },
+    favs: new Set(LS.get(K.fav, [])),
+    history: LS.get(K.hist, []),
+    recentQ: LS.get(K.q, []),
+  };
+
+  // ------------------------------------------------------------ 資料載入
+  async function loadData() {
+    if (window.__PI_INLINE__) return window.__PI_INLINE__;
+        throw new Error('standalone 版冇外部數據（本應內聯）');
+
+  }
+
+  // ------------------------------------------------------------ 名稱查找
+  const maps = { maker: {}, makerAl: {}, ip: {}, brand: {}, brandAl: {}, cat: {}, ch: {}, st: {} };
+  const STATUS_LABEL = {
+    on_sale: ['已發售', '発売中', '已发售'],
+    announced: ['予告', '未發売', '未発売', '發售預定', '發售預定'],
+  };
+  function buildMaps() {
+    (state.tax.filters.maker || []).forEach(m => {
+      maps.maker[m.code] = m.name_jp || m.code;
+      maps.makerAl[m.code] = m.aliases || [];
+    });
+    (state.tax.filters.ip_work || []).forEach(w => {
+      maps.ip[w.code] = { jp: w.title_jp, en: w.title_en, zh: w.title_zh, al: w.aliases || [] };
+    });
+    (state.tax.filters.brand_line || []).forEach(b => {
+      maps.brand[b.code] = b.name;
+      maps.brandAl[b.code] = b.aliases || [];
+    });
+    (state.tax.filters.category || []).forEach(c => {
+      maps.cat[c.code] = `${c.label_zh || ''} ${c.label_jp || ''}`.trim();
+    });
+    (state.tax.filters.channel_type || []).forEach(c => {
+      maps.ch[c.code] = `${c.label_zh || ''} ${c.label_jp || ''}`.trim();
+    });
+  }
+  const makerName = c => maps.maker[c] || c || '—';
+  const ipLabel = c => (maps.ip[c] ? maps.ip[c].jp : (c || '—'));
+  const brandName = c => maps.brand[c] || c || '';
+  const catName = c => maps.cat[c] || c || '';
+
+  // ------------------------------------------------------------ 搜尋索引
+  function searchBlob(it) {
+    const ip = maps.ip[it.ip] || {};
+    const parts = [
+      it.official_name, it.raw_title,
+      makerName(it.maker), ...(maps.makerAl[it.maker] || []),
+      brandName(it.brand), ...(maps.brandAl[it.brand] || []),
+      ip.jp, ip.en, ip.zh, ...(ip.al || []),
+      (it.characters || []).join(' '),
+      catName(it.category),
+      maps.ch[it.channel] || '',
+      ...(STATUS_LABEL[it.status] || []),
+      it.series_group ? `vol.${it.series_group} 第${it.series_group}弾` : '',
+      it.prize_tier || '',
+      it.prize_tier && it.prize_tier.includes('ラストワン') ? '最終賞 尾賞 last one' : '',
+    ];
+    // 尺寸／月份／再販／獎池都要搜得到（自測發現 miss）
+    if (it.size_cm) parts.push(`${it.size_cm}cm`, `約${it.size_cm}cm`);
+    if (it.release_month) {
+      const [y, m] = it.release_month.split('-');
+      parts.push(it.release_month, `${y}年${Number(m)}月`);
+    }
+    if (it.is_resale) parts.push('再販', '再版');
+    if (it.is_kuji_pool) parts.push('獎池', 'プール');
+    return norm(parts.filter(Boolean).join(' '));
+  }
+  function indexItems() { state.items.forEach(it => { it._blob = searchBlob(it); }); }
+
+  // ------------------------------------------------------------ 篩選 + 搜尋
+  function passesFilters(it) {
+    const f = state.filters;
+    const test = (set, v) => set.size === 0 || set.has(String(v));
+    if (!test(f.maker, it.maker)) return false;
+    if (!test(f.brand, it.brand)) return false;
+    if (!test(f.ip, it.ip)) return false;
+    if (!test(f.category, it.category)) return false;
+    if (!test(f.tier, it.prize_tier || '')) return false;
+    if (!test(f.size, it.size_cm)) return false;
+    if (!test(f.month, it.release_month)) return false;
+    if (!test(f.status, it.status)) return false;
+    return true;
+  }
+
+  function currentRows() {
+    if (state.channel === 'preview') return [];
+    if (state.channel === 'favorites') {
+      return state.items.filter(it => state.favs.has(it.id) && passesFilters(it));
+    }
+    let rows = state.items.filter(passesFilters);
+    if (state.channel !== 'all') rows = rows.filter(it => it.channel === state.channel);
+    const q = norm(state.q);
+    state._orFallback = false;
+    if (q) {
+      const toks = q.split(' ').filter(Boolean);
+      let hit = rows.filter(it => toks.every(t => it._blob.includes(t)));
+      if (!hit.length && toks.length > 1) {
+        // 多詞完全冇 → 退回「任一詞」並喺 UI 講清楚（唔好靜靜報 0）
+        hit = rows.filter(it => toks.some(t => it._blob.includes(t)));
+        state._orFallback = hit.length > 0;
+      }
+      rows = hit;
+      rows.forEach(it => { it._score = toks.filter(t => norm(it.official_name).includes(t)).length; });
+    }
+    rows = sortRows(rows);
+    return rows;
+  }
+
+  function sortRows(rows) {
+    const by = {
+      // 冇搜尋詞時「相關度」退化為瀏覽熱度＋新舊，避免開頁第一眼係隨機順序
+      relevance: (a, b) => (b._score || 0) - (a._score || 0)
+        || (b.views_7d || 0) - (a.views_7d || 0)
+        || (b.release_month || '').localeCompare(a.release_month || ''),
+      newest: (a, b) => (b.release_month || '').localeCompare(a.release_month || ''),
+      views: (a, b) => (b.views_7d || 0) - (a.views_7d || 0),
+      price: (a, b) => ((b.price && b.price.baseline_jpy) || 0) - ((a.price && a.price.baseline_jpy) || 0),
+      size: (a, b) => (b.size_cm || 0) - (a.size_cm || 0),
+    }[state.sort];
+    return rows.slice().sort(by);
+  }
+
+  // ------------------------------------------------------------ 高亮
+  function highlight(text) {
+    const safe = esc(text);
+    const q = state.q.trim();
+    if (!q) return safe;
+    const toks = norm(q).split(' ').filter(t => t.length >= 2);
+    let out = safe;
+    toks.forEach(t => {
+      // 用原始字串做寬鬆對照（避免 norm 後位置偏移）：直接對未 norm 文字做 case-insensitive 取代
+      const re = new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'ig');
+      out = out.replace(re, '<mark>$1</mark>');
+    });
+    return out;
+  }
+
+  // ------------------------------------------------------------ 排序文字
+  const MONTH_LABEL = m => (m ? m.replace('-', '年') + '月' : '—');
+  const jpy = n => (n == null ? '—' : '¥' + Number(n).toLocaleString('ja-JP'));
+
+  // ------------------------------------------------------------ 卡片
+  function cardHTML(it) {
+    const fav = state.favs.has(it.id) ? ' on' : '';
+    const chips = [];
+    chips.push(`<span class="chip maker">${esc(makerName(it.maker))}</span>`);
+    if (it.brand) chips.push(`<span class="chip brand">${esc(brandName(it.brand))}</span>`);
+    if (it.ip) chips.push(`<span class="chip ip">${esc(ipLabel(it.ip))}</span>`);
+    if (it.channel === 'ichiban_kuji') chips.push(`<span class="chip kuji">一番くじ${it.prize_tier ? '・' + esc(it.prize_tier) : ''}</span>`);
+    chips.push(it.demo ? '<span class="chip demo">DEMO</span>' : '<span class="chip real">実データ</span>');
+
+    const price = it.price || {};
+    const stale = price.captured_at && price.captured_at < '2026-09-20';
+    const showViews = state.view === 'player' && DATA_FLAGS.views;
+    const showSeries = state.view === 'shop' && it.series_group;
+
+    const links = [
+      `<a href="${esc(it.market_links.surugaya)}" target="_blank" rel="noopener noreferrer">駿河屋</a>`,
+      `<a href="${esc(it.market_links.mercari)}" target="_blank" rel="noopener noreferrer">メルカリ</a>`,
+      `<a href="${esc(it.market_links.yahoo)}" target="_blank" rel="noopener noreferrer">ヤフオク</a>`,
+    ].join('');
+
+    return `<article class="card" data-id="${it.id}">
+      <div class="card-top">
+        <h3 class="card-title">${highlight(it.official_name)}</h3>
+        <button class="fav${fav}" data-fav="${it.id}" type="button" title="收藏">★</button>
+      </div>
+      <div class="chips">${chips.join('')}</div>
+      <div class="card-meta">
+        <span>發售 <b>${esc(MONTH_LABEL(it.release_month))}</b></span>
+        <span>尺寸 <b>${it.size_cm ? '約' + it.size_cm + 'cm' : '—'}</b></span>
+        <span>${it.status === 'on_sale' ? '已發售' : '予告'}</span>
+        ${it.is_resale ? '<span style="color:#a8792b">再販</span>' : ''}
+        ${showSeries ? `<span>系列號 <b>${esc(it.series_group)}</b></span>` : ''}
+        ${it.is_kuji_pool ? '<span>獎池</span>' : ''}
+      </div>
+      <div class="price">
+        <span><span class="k">基準</span> <span class="v">${jpy(price.baseline_jpy)}</span></span>
+        <span><span class="k">成交樣本</span> <span class="v">${jpy(price.sold_min_jpy)}–${jpy(price.sold_max_jpy)}</span></span>
+        <span class="stale">${esc(price.captured_at || '')}${stale ? '（已過期）' : ''}</span>
+      </div>
+      <div class="card-foot">
+        <div class="links">${links}</div>
+        ${showViews && DATA_FLAGS.views ? `<span class="views">瀏覽 <b>${Number(it.views_7d || 0).toLocaleString('ja-JP')}</b></span>` : ''}
+      </div>
+    </article>`;
+  }
+
+  // ------------------------------------------------------------ 篩選欄
+  const FILTER_DEFS = [
+    { key: 'maker', label: '廠商', get: it => it.maker, name: makerName },
+    { key: 'brand', label: '系列線', get: it => it.brand, name: brandName },
+    { key: 'ip', label: '作品 IP', get: it => it.ip, name: ipLabel },
+    { key: 'category', label: '品類', get: it => it.category, name: catName },
+    { key: 'month', label: '發售月', get: it => it.release_month, name: MONTH_LABEL },
+    { key: 'size', label: '尺寸（5cm 桶）', get: it => it.size_cm, name: v => '約' + v + 'cm' },
+    { key: 'status', label: '狀態', get: it => it.status, name: v => (v === 'on_sale' ? '已發售' : '予告') },
+  ];
+  const SHOW_LIMIT = 6;
+
+  function renderFilters() {
+    const rows = state.channel === 'all' || state.channel === 'favorites' || state.channel === 'preview'
+      ? state.items : state.items.filter(it => it.channel === state.channel);
+    const html = FILTER_DEFS.map(def => {
+      const counts = new Map();
+      rows.forEach(it => {
+        const v = def.get(it);
+        if (v === null || v === undefined || v === '') return;
+        const k = String(v);
+        counts.set(k, (counts.get(k) || 0) + 1);
+      });
+      let entries = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
+      if (def.key === 'size') entries.sort((a, b) => Number(a[0]) - Number(b[0]));
+      if (def.key === 'month') entries.sort((a, b) => a[0].localeCompare(b[0]));
+      const more = entries.length > SHOW_LIMIT;
+      const shown = entries.slice(0, SHOW_LIMIT);
+      const rest = entries.slice(SHOW_LIMIT);
+      const opt = ([v, n]) => `<div class="fopt"><input type="checkbox" id="f_${def.key}_${esc(v)}" data-fkey="${def.key}" value="${esc(v)}" ${state.filters[def.key].has(v) ? 'checked' : ''}><label for="f_${def.key}_${esc(v)}">${esc(def.name(v))}</label><span class="n">${n}</span></div>`;
+      return `<div class="fgroup" data-fg="${def.key}">
+        <h3>${def.label}${state.filters[def.key].size ? ' <button class="clr" data-clr="${def.key}" type="button">清除</button>' : ''}</h3>
+        ${shown.map(opt).join('')}
+        ${rest.length ? `<div class="hidden" data-more="${def.key}">${rest.map(opt).join('')}</div><button class="fmore" data-morebtn="${def.key}" type="button">＋ 更多（${rest.length}）</button>` : ''}
+      </div>`;
+    }).join('');
+
+    $('#filters').innerHTML = `${html}
+      <div class="filter-foot"><button id="resetFilters" type="button">重設全部篩選</button></div>`;
+  }
+
+  // ------------------------------------------------------------ 榜單 / 側欄
+  function renderRankings() {
+    const onSale = state.items;
+    if (state.view === 'player') {
+      $('#rank1Title').textContent = DATA_FLAGS.views ? '7 日瀏覽熱度 TOP10' : '瀏覽熱度（未接）';
+      $('#rank1Note').textContent = DATA_FLAGS.views ? '玩家瀏覽熱度（非採購行情指標）' : '等 item_view_daily 接入，唔會用假數';
+      const top = onSale.slice().sort((a, b) => b.views_7d - a.views_7d).slice(0, 10);
+      $('#rankItems').innerHTML = top.map(it => `<li><button data-goto="${it.id}" type="button"><span class="t">${esc(it.official_name)}</span><span class="m">${Number(it.views_7d).toLocaleString('ja-JP')} 次瀏覽</span></button></li>`).join('');
+
+      $('#rank2Title').textContent = 'IP 瀏覽熱度';
+      $('#rank2Note').textContent = '按商品瀏覽量彙總，唔係搜尋查詢量';
+      const byIp = new Map();
+      onSale.forEach(it => { if (!it.ip) return; byIp.set(it.ip, (byIp.get(it.ip) || 0) + (it.views_7d || 0)); });
+      const ips = Array.from(byIp.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      $('#rankIp').innerHTML = ips.map(([ip, v]) => `<li><button data-ip="${esc(ip)}" type="button"><span class="t">${esc(ipLabel(ip))}</span><span class="m">${Number(v).toLocaleString('ja-JP')} 瀏覽</span></button></li>`).join('');
+    } else {
+      $('#rank1Title').textContent = '同系列款數 TOP10';
+      $('#rank1Note').textContent = '店舖視角：睇邊個系列出貨最密';
+      const bySeries = new Map();
+      onSale.forEach(it => { if (it.brand) bySeries.set(it.brand, (bySeries.get(it.brand) || 0) + 1); });
+      const top = Array.from(bySeries.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      $('#rankItems').innerHTML = top.map(([b, n]) => `<li><button data-brand="${esc(b)}" type="button"><span class="t">${esc(brandName(b))}</span><span class="m">${n} 款</span></button></li>`).join('');
+
+      $('#rank2Title').textContent = '預告／再販清單';
+      $('#rank2Note').textContent = '店舖視角：入貨前要知嘅時間點';
+      const soon = onSale.filter(it => it.status === 'announced' || it.is_resale)
+        .sort((a, b) => (a.release_month || '').localeCompare(b.release_month || '')).slice(0, 8);
+      $('#rankIp').innerHTML = soon.map(it => `<li><button data-goto="${it.id}" type="button"><span class="t">${esc(it.official_name)}</span><span class="m">${esc(MONTH_LABEL(it.release_month))}${it.is_resale ? ' ・再販' : ''}</span></button></li>`).join('');
+    }
+
+    // 收藏
+    const favs = state.items.filter(it => state.favs.has(it.id));
+    $('#favList').innerHTML = favs.length
+      ? favs.map(it => `<li><button data-goto="${it.id}" type="button">${esc(it.official_name.slice(0, 34))}</button></li>`).join('')
+      : '<li class="muted">未有收藏</li>';
+    $('#favCount').textContent = String(favs.length);
+
+    // 最近搜尋
+    $('#recentQ').innerHTML = state.recentQ.length
+      ? state.recentQ.slice(0, 6).map(q => `<li><button data-q="${esc(q)}" type="button">${esc(q)}</button></li>`).join('')
+      : '<li class="muted">—</li>';
+  }
+
+  // ------------------------------------------------------------ 列表 / 速報
+  function render() {
+    const rows = currentRows();
+    const list = $('#list');
+    const prev = $('#previewList');
+    const empty = $('#empty');
+
+    if (state.channel === 'preview') {
+      list.classList.add('hidden');
+      empty.classList.add('hidden');
+      prev.classList.remove('hidden');
+      prev.innerHTML = state.preview.map(p => `<div class="prow"><p class="pt">${esc(p.title)}</p><p class="pm">${esc(p.maker_text)} ・ ${esc(p.source)} ・ ${esc(p.note)}</p></div>`).join('');
+      $('#resultCount').textContent = `新貨速報 ${state.preview.length} 條（預告看板，唔入商品索引）`;
+      renderFilters(); renderRankings();
+      return;
+    }
+    prev.classList.add('hidden');
+    list.classList.remove('hidden');
+    empty.classList.toggle('hidden', rows.length > 0);
+    list.innerHTML = rows.map(cardHTML).join('');
+    $('#resultCount').textContent = `顯示 ${rows.length} / ${state.items.length} 款` +
+      (state.q ? `（搜尋：${state.q}）` : '') +
+      (state._orFallback ? '　⚠️ 冇完全符合，顯示部分符合' : '');
+    renderFilters();
+    renderRankings();
+  }
+
+  // ------------------------------------------------------------ 排序 select
+  function syncSortDefault() {
+    // 店舖視角預設按發售月；玩家視角預設相關度
+    if (!state._sortTouched) {
+      state.sort = state.view === 'shop' ? 'newest' : 'relevance';
+      $('#sort').value = state.sort;
+    }
+  }
+
+  // ------------------------------------------------------------ 意見・要望・苦情（mailto，零後端）
+  const META = {
+    email: (document.querySelector('meta[name="contact-email"]') || {}).content || '',
+    version: (document.querySelector('meta[name="beta-version"]') || {}).content || 'v0.1',
+  };
+  const DATA_FLAGS = { views: true, price: true };
+
+  const emailReady = !!META.email && !/__|example\.com/i.test(META.email);
+
+  function contactHref() {
+    const subj = encodeURIComponent(`[景品情報索引 ${META.version}] 意見・要望・苦情`);
+    return `mailto:${emailReady ? META.email : ''}?subject=${subj}`;
+  }
+  function applyContact() {
+    $$('[data-contact]').forEach(a => {
+      if (emailReady) { a.href = contactHref(); delete a.dataset.pending; }
+      else { a.href = '#'; a.dataset.pending = '1'; }   // 未設定：撳咗複製模板，唔開空白郵件
+    });
+    if (!emailReady) console.warn('[prize-intel] 聯絡郵箱未設定：改 config.json 嘅 contact_email 再 build');
+  }
+
+  function mailTemplate() {
+    const active = Object.entries(state.filters)
+      .filter(([, s]) => s.size)
+      .map(([k, s]) => `${k}=${Array.from(s).join('|')}`);
+    return [
+      `[景品情報索引 ${META.version}] 意見・要望・苦情`,
+      `版本：${META.version}`,
+      `視角：${state.view === 'shop' ? '店舖採購' : '一般玩家'}`,
+      `最近搜尋：${state.recentQ.join(' / ') || '（無）'}`,
+      `當時篩選：${active.join(' ; ') || '（無）'}`,
+      '',
+      '我想反映：',
+      '① 缺邊個 IP／系列：',
+      '② 搵唔到邊件貨（搜尋詞）：',
+      '③ 其他（資料錯／用落唔順／想加功能）：',
+      '',
+      '（可唔可以回覆我：願意／唔願意）',
+    ].join('\n');
+  }
+
+  async function copyMailTemplate() {
+    const text = mailTemplate();
+    const note = $('#tplNote');
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      } catch { window.prompt('複製唔到，請手動複製：', text); }
+    }
+    if (note) {
+      note.textContent = emailReady
+        ? '模板已複製。撳上面「意見・要望・苦情はこちら」開郵件，貼上就發。'
+        : '模板已複製，但聯絡郵箱未設定（Beta 設定中）。';
+      note.classList.add('ok');
+    }
+  }
+
+  // ------------------------------------------------------------ 事件
+  function bind() {
+    $('#q').addEventListener('input', e => {
+      state.q = e.target.value;
+      if (state.q.trim().length >= 2) rememberQuery(state.q.trim());
+      render();
+    });
+    $('#clearQ').addEventListener('click', () => { state.q = ''; $('#q').value = ''; render(); });
+
+    $('#sort').addEventListener('change', e => { state.sort = e.target.value; state._sortTouched = true; render(); });
+
+    $$('.tabs button').forEach(b => b.addEventListener('click', () => {
+      $$('.tabs button').forEach(x => x.classList.toggle('active', x === b));
+      state.channel = b.dataset.channel;
+      render();
+    }));
+
+    $$('.viewtoggle button').forEach(b => b.addEventListener('click', () => {
+      state.view = b.dataset.view;
+      LS.set(K.view, state.view);
+      $$('.viewtoggle button').forEach(x => x.classList.toggle('active', x === b));
+      syncSortDefault();
+      render();
+    }));
+
+    // 篩選（事件委派）
+    $('#filters').addEventListener('change', e => {
+      const cb = e.target.closest('input[data-fkey]');
+      if (!cb) return;
+      const set = state.filters[cb.dataset.fkey];
+      cb.checked ? set.add(cb.value) : set.delete(cb.value);
+      render();
+    });
+    $('#filters').addEventListener('click', e => {
+      const clr = e.target.closest('[data-clr]');
+      if (clr) { state.filters[clr.dataset.clr].clear(); render(); return; }
+      const more = e.target.closest('[data-morebtn]');
+      if (more) {
+        const box = $(`[data-more="${more.dataset.morebtn}"]`);
+        box.classList.toggle('hidden');
+        more.textContent = box.classList.contains('hidden') ? `＋ 更多` : '− 收起';
+        return;
+      }
+      if (e.target.closest('#resetFilters')) {
+        Object.values(state.filters).forEach(s => s.clear());
+        render();
+      }
+    });
+
+    // 收藏 / 前往
+    $('#list').addEventListener('click', e => {
+      const fav = e.target.closest('[data-fav]');
+      if (fav) { toggleFav(fav.dataset.fav); return; }
+      const card = e.target.closest('.card');
+      if (card) recordHistory(card.dataset.id);
+    });
+    $('#sidebar')?.addEventListener('click', () => {});
+    document.addEventListener('click', e => {
+      const goto = e.target.closest('[data-goto]');
+      if (goto) {
+        const it = state.items.find(x => x.id === goto.dataset.goto);
+        if (it) { recordHistory(it.id); $('#q').value = it.official_name; state.q = it.official_name; render(); }
+        return;
+      }
+      const byIp = e.target.closest('[data-ip]');
+      if (byIp) { state.filters.ip = new Set([byIp.dataset.ip]); state.channel = 'all'; render(); return; }
+      const byBrand = e.target.closest('[data-brand]');
+      if (byBrand) { state.filters.brand = new Set([byBrand.dataset.brand]); state.channel = 'all'; render(); return; }
+      const recent = e.target.closest('[data-q]');
+      if (recent) { state.q = recent.dataset.q; $('#q').value = state.q; render(); return; }
+      if (e.target.closest('#clearLocal')) { clearLocal(); }
+      if (e.target.closest('#exportFeedback')) { copyFeedback(); }
+      const pending = e.target.closest('[data-contact][data-pending]');
+      if (pending) { e.preventDefault(); copyMailTemplate(); return; }
+      if (e.target.closest('#copyTemplate, #copyTemplateFoot')) { copyMailTemplate(); }
+    });
+  }
+
+  function toggleFav(id) {
+    state.favs.has(id) ? state.favs.delete(id) : state.favs.add(id);
+    LS.set(K.fav, Array.from(state.favs));
+    render();
+  }
+  function recordHistory(id) {
+    if (!id) return;
+    state.history = [id, ...state.history.filter(x => x !== id)].slice(0, 50);
+    LS.set(K.hist, state.history);
+  }
+  function rememberQuery(q) {
+    if (!q) return;
+    if (state.recentQ[0] === q) return;
+    state.recentQ = [q, ...state.recentQ.filter(x => x !== q)].slice(0, 8);
+    LS.set(K.q, state.recentQ);
+  }
+  function clearLocal() {
+    state.favs.clear(); state.history = []; state.recentQ = [];
+    Object.keys(K).forEach(k => LS.del(K[k]));
+    render();
+  }
+
+  // ---- Beta 自願回報：只複製文字到剪貼板，零網絡、零上傳
+  function feedbackText() {
+    const active = Object.entries(state.filters)
+      .filter(([, s]) => s.size)
+      .map(([k, s]) => `${k}=${Array.from(s).join('|')}`);
+    return [
+      `[景品情報索引 Beta 回饋] ${new Date().toISOString().slice(0, 10)}`,
+      `視角：${state.view === 'shop' ? '店舖採購' : '一般玩家'}`,
+      `最近搜尋（最多 8 個）：${state.recentQ.join(' / ') || '（無）'}`,
+      `當時篩選：${active.join(' ; ') || '（無）'}`,
+      `收藏數：${state.favs.size}　現時分類：${state.channel}`,
+      `想搵但搵唔到（請自行填）：`,
+      `覺得缺邊個 IP／系列（請自行填）：`,
+    ].join('\n');
+  }
+
+  async function copyFeedback() {
+    const text = feedbackText();
+    const note = $('#fbNote');
+    try {
+      await navigator.clipboard.writeText(text);
+      note.textContent = '已複製到剪貼板（只喺你部機，冇上傳）。貼返俾我就可以，多謝。';
+      note.classList.add('ok');
+      return;
+    } catch { /* 落 fallback */ }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      note.textContent = '已複製（fallback）。貼返俾我就得。';
+      note.classList.add('ok');
+    } catch {
+      window.prompt('複製唔到，請手動複製以下文字：', text);
+    }
+  }
+
+  // ------------------------------------------------------------ 啟動
+  (async function boot() {
+    try {
+      const data = await loadData();
+      state.tax = data.taxonomy;
+      state.payload = data.items;
+      state.items = data.items.items || [];
+      state.preview = data.items.preview || [];
+      buildMaps(); indexItems();
+
+      const meta = data.items._meta || {};
+      DATA_FLAGS.views = meta.views_available !== false;
+      DATA_FLAGS.price = meta.price_available !== false;
+      const c = meta.counts || {};
+      const total = c.total || state.items.length;
+      $('#metaCount').textContent = (c.real === total)
+        ? `真數據 ${total} 款（全部實抓）・索引由 taxonomy.json 同步`
+        : `示範數據 ${total} 款（真實標題 ${c.real ?? '—'}）・索引由 taxonomy.json 同步`;
+
+      // 初始化 UI
+      $$('.viewtoggle button').forEach(b => b.classList.toggle('active', b.dataset.view === state.view));
+      $('#sort').value = state.sort;
+      syncSortDefault();
+      applyContact();
+      bind();
+      render();
+      console.info('[prize-intel] demo ready:', c, 'privacy=local-only');
+    } catch (err) {
+      document.body.insertAdjacentHTML('afterbegin',
+        `<div class="notice" style="color:#b03a2e">載入失敗：${esc(err.message)}。如果係用 file:// 直接開，請改用 <code>standalone.html</code>，或者起個靜態 server（<code>pwsh -File serve.ps1</code>）。</div>`);
+      console.error(err);
+    }
+  })();
+})();
+
+</script>
+</body>
+</html>

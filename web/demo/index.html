@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="contact-email" content="__CONTACT_EMAIL__">
+<meta name="beta-version" content="__BETA_VERSION__">
+<title>景品情報索引 — 日本夾機景品・一番くじ（Beta 示範版）</title>
+<meta name="description" content="日本夾機景品／一番くじ情報索引（Beta 示範版）。搜尋、多維篩選、瀏覽熱度榜、本地收藏。非官方、示範數據、不構成入貨建議。">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="brand">
+    <h1>景品情報索引<span class="badge-demo">DEMO</span><span class="badge-beta">BETA</span></h1>
+    <p class="sub">日本夾機景品 ・ 一番くじ ｜ 情報索引（Beta 示範版・非官方）</p>
+  </div>
+  <div class="header-actions">
+    <div class="viewtoggle" role="group" aria-label="切換視角">
+      <button data-view="player" class="active" type="button">一般玩家</button>
+      <button data-view="shop" type="button">店舖採購視角</button>
+    </div>
+  </div>
+</header>
+
+<div class="notice" role="note">
+  <strong>示範數據</strong>：真實標題（bsp-prize／コレトレ 實測）＋ 標示 <em>DEMO</em> 嘅合成示範貨。
+  榜單標示為「<strong>玩家瀏覽熱度</strong>」，<u>唔係採購行情指標</u>。
+  搜尋、瀏覽記錄、收藏全部喺瀏覽器本地運算，唔上傳伺服器。
+</div>
+
+<nav class="tabs" aria-label="主分類">
+  <button data-channel="all" class="active" type="button">全部</button>
+  <button data-channel="prize" type="button">夾機景品</button>
+  <button data-channel="ichiban_kuji" type="button">一番くじ</button>
+  <button data-channel="preview" type="button">新貨速報</button>
+  <button data-channel="favorites" type="button">我的收藏 <span id="favCount" class="count">0</span></button>
+</nav>
+
+<main class="layout">
+  <aside class="filters" id="filters" aria-label="篩選"></aside>
+
+  <section class="results">
+    <div class="searchbar">
+      <input id="q" type="search" autocomplete="off"
+             placeholder="搵商品名／角色／IP／系列線…（例：MAXIMATIC、義勇、ちいかわ、Luminasta）">
+      <button id="clearQ" type="button" title="清除">✕</button>
+    </div>
+
+    <div class="result-head">
+      <span id="resultCount" class="muted">—</span>
+      <label class="sortwrap">排序
+        <select id="sort">
+          <option value="relevance">相關度</option>
+          <option value="newest">發售月（新→舊）</option>
+          <option value="views">瀏覽熱度</option>
+          <option value="price">基準價（高→低）</option>
+          <option value="size">尺寸（大→小）</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="list" class="cards"></div>
+    <div id="previewList" class="preview hidden"></div>
+    <div id="empty" class="empty hidden">冇符合條件嘅貨。試下減少篩選，或者用 IP／系列線搜。</div>
+  </section>
+
+  <aside class="sidebar">
+    <section class="panel">
+      <h2 id="rank1Title">7 日瀏覽熱度 TOP10</h2>
+      <p class="panel-note" id="rank1Note">玩家瀏覽熱度（非採購行情指標）</p>
+      <ol id="rankItems" class="rank"></ol>
+    </section>
+
+    <section class="panel">
+      <h2 id="rank2Title">IP 瀏覽熱度</h2>
+      <p class="panel-note" id="rank2Note">按商品瀏覽量彙總，唔係搜尋查詢量</p>
+      <ol id="rankIp" class="rank"></ol>
+    </section>
+
+    <section class="panel">
+      <h2>我的收藏</h2>
+      <ul id="favList" class="mini-list"><li class="muted">未有收藏</li></ul>
+    </section>
+
+    <section class="panel">
+      <h2>最近搜尋</h2>
+      <ul id="recentQ" class="mini-list"><li class="muted">—</li></ul>
+    </section>
+
+    <section class="panel contact">
+      <h2>意見・要望・苦情</h2>
+      <p class="contact-lead">缺貨、想加 IP／系列、資料有錯、用落唔順、想鬧——直接開郵件寫就得。</p>
+      <a class="contact-btn" data-contact href="mailto:" rel="nofollow noopener">意見・要望・苦情はこちら</a>
+      <button id="copyTemplate" class="ghost" type="button">一鍵複製郵件模板</button>
+      <p class="fb-note" id="tplNote">複製「版本號＋你嘅情況」做模板，貼落郵件就發。唔使註冊、唔使填表。</p>
+    </section>
+
+    <section class="panel privacy">
+      <h2>私隱</h2>
+      <p>搜尋同篩選喺頁面內完成；瀏覽記錄、收藏、最近搜尋存喺 <code>localStorage</code>，唔會離開你部機。冇分析追蹤 script、冇 cookie。</p>
+      <button id="exportFeedback" class="ghost" type="button">複製我嘅搜尋記錄（自願回報 Beta 用）</button>
+      <p class="fb-note" id="fbNote">只會複製你最近嘅搜尋詞同篩選狀態成文字，由你自行貼返俾我。唔會自動上傳。</p>
+      <button id="clearLocal" class="ghost" type="button">清除本地資料</button>
+    </section>
+  </aside>
+</main>
+
+<footer class="site-foot">
+  <div class="foot-contact">
+    <a class="contact-btn" data-contact href="mailto:" rel="nofollow noopener">意見・要望・苦情はこちら</a>
+    <button id="copyTemplateFoot" class="ghost small" type="button">複製郵件模板</button>
+    <span class="muted">直接開你嘅郵件程式，冇表單、冇追蹤、冇 cookie。</span>
+  </div>
+  <section class="disclaimer">
+    <h2>免責聲明（Beta 示範版）</h2>
+    <ul>
+      <li>本頁為 <strong>Beta 示範版</strong>。數據混合<strong>真實標題</strong>（bsp-prize／コレトレ 實測）同標示 <em>DEMO</em> 嘅<strong>合成示範樣本</strong>。</li>
+      <li>價格、成交樣本、瀏覽數、榜單名次<strong>全部係示範數值</strong>，唔代表真實行情或市場實況。</li>
+      <li>本網站<strong>非官方</strong>網站，與任何廠商、問屋、拍賣平台沒有合作或授權關係。</li>
+      <li>所有內容<strong>不構成入貨、投資或購買建議</strong>；使用者須自行判斷風險。</li>
+      <li>暫時<strong>不提供任何商品原圖</strong>，只有文字情報，以避免圖片版權問題。</li>
+      <li><strong>零收集</strong>：冇分析追蹤 script、冇 cookie、冇 user id；搜尋／收藏／瀏覽記錄只存喺你部機嘅 <code>localStorage</code>。</li>
+      <li>商標及作品名稱屬各自權利人所有，本頁只作情報索引用途。</li>
+    </ul>
+  </section>
+  <div class="foot-meta">
+    <span>Beta v0.1 · 分類樹由 <code>taxonomy.json</code> 自動同步</span>
+    <span id="metaCount" class="muted"></span>
+  </div>
+</footer>
+
+<script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1558 @@
+{
+  "_meta": {
+    "generated_at": "2026-10-28",
+    "generator": "module1/export_taxonomy.py",
+    "sources": [
+      "module1/aliases.py",
+      "schema/01_schema.sql",
+      "schema/gen_seed.py"
+    ],
+    "do_not_edit": "唔准手改；改來源後重跑 script",
+    "counts": {
+      "makers": 9,
+      "works": 100,
+      "brand_lines": 25,
+      "categories": 12
+    }
+  },
+  "nav": [
+    {
+      "id": "kuji",
+      "label_zh": "一番くじ",
+      "label_jp": "一番くじ",
+      "route": "/kuji",
+      "status": "ok"
+    },
+    {
+      "id": "prize",
+      "label_zh": "夾機景品",
+      "label_jp": "プライズ",
+      "route": "/prize",
+      "status": "ok"
+    },
+    {
+      "id": "used",
+      "label_zh": "中古二手",
+      "label_jp": "中古",
+      "route": "/used",
+      "status": "ok",
+      "note": "只存外部連結＋樣本價，唔抓全量"
+    },
+    {
+      "id": "schedule",
+      "label_zh": "發售日程",
+      "label_jp": "発売スケジュール",
+      "route": "/schedule",
+      "status": "ok"
+    },
+    {
+      "id": "market",
+      "label_zh": "行情數據",
+      "label_jp": "相場",
+      "route": "/market",
+      "status": "phase2",
+      "note": "第一階段只出 price_ref 基準線，唔做走勢圖"
+    },
+    {
+      "id": "ranking",
+      "label_zh": "排行榜",
+      "label_jp": "ランキング",
+      "route": "/ranking",
+      "status": "pending",
+      "note": "等決定：item 級每日聚合（方案A）或外部訊號（方案B）"
+    },
+    {
+      "id": "mine",
+      "label_zh": "我的收藏",
+      "label_jp": "マイリスト",
+      "route": "/mine",
+      "status": "ok",
+      "note": "純 localStorage，零後端"
+    }
+  ],
+  "filters": {
+    "channel_type": [
+      {
+        "code": "prize",
+        "label_zh": "夾機景品",
+        "label_jp": "プライズ",
+        "nav": "prize"
+      },
+      {
+        "code": "ichiban_kuji",
+        "label_zh": "一番くじ",
+        "label_jp": "一番くじ",
+        "nav": "kuji"
+      },
+      {
+        "code": "gacha",
+        "label_zh": "扭蛋",
+        "label_jp": "ガチャ",
+        "nav": null
+      },
+      {
+        "code": "retail",
+        "label_zh": "一般販售",
+        "label_jp": "一般販売",
+        "nav": null
+      }
+    ],
+    "maker": [
+      {
+        "code": "bandai_spirits",
+        "name_jp": "BANDAI SPIRITS（バンプレスト）",
+        "name_en": "Bandai Spirits",
+        "aliases": [
+          "バンプレスト",
+          "バンプレ",
+          "BANPRESTO",
+          "バンダイスピリッツ",
+          "BANDAI SPIRITS"
+        ]
+      },
+      {
+        "code": "sega_fave",
+        "name_jp": "セガ フェイブ",
+        "name_en": "Sega Fave",
+        "aliases": [
+          "セガ",
+          "SEGA",
+          "セガフェイブ",
+          "セガ フェイブ"
+        ]
+      },
+      {
+        "code": "taito",
+        "name_jp": "タイトー",
+        "name_en": "Taito",
+        "aliases": [
+          "TAITO",
+          "株式会社タイトー"
+        ]
+      },
+      {
+        "code": "furyu",
+        "name_jp": "フリュー",
+        "name_en": "FuRyu",
+        "aliases": [
+          "FURYU",
+          "フリュー"
+        ]
+      },
+      {
+        "code": "eikoh",
+        "name_jp": "エイコー",
+        "name_en": "Eikoh",
+        "aliases": [
+          "EIKOH",
+          "エイコー"
+        ]
+      },
+      {
+        "code": "system_service",
+        "name_jp": "システムサービス",
+        "name_en": "System Service",
+        "aliases": [
+          "SYSTEM SERVICE"
+        ]
+      },
+      {
+        "code": "konami_ags",
+        "name_jp": "コナミアーケードゲームス",
+        "name_en": "Konami Amusement",
+        "aliases": [
+          "コナミ",
+          "KONAMI",
+          "コナミアミューズメント"
+        ]
+      },
+      {
+        "code": "kitan_club",
+        "name_jp": "奇譚クラブ",
+        "name_en": "Kitan Club",
+        "aliases": [
+          "KITAN CLUB"
+        ]
+      },
+      {
+        "code": "other",
+        "name_jp": "その他",
+        "name_en": "Other",
+        "aliases": [
+          "TAKARA",
+          "TAKARA TOMY",
+          "タカラトミー"
+        ]
+      }
+    ],
+    "brand_line": [
+      {
+        "code": "maximatic",
+        "maker": "bandai_spirits",
+        "name": "MAXIMATIC",
+        "aliases": [
+          "マキシマティック"
+        ]
+      },
+      {
+        "code": "grandista",
+        "maker": "bandai_spirits",
+        "name": "Grandista",
+        "aliases": [
+          "グランディスタ"
+        ]
+      },
+      {
+        "code": "vibration_stars",
+        "maker": "bandai_spirits",
+        "name": "VIBRATION STARS",
+        "aliases": [
+          "バイブレーションスターズ"
+        ]
+      },
+      {
+        "code": "memorable_saga",
+        "maker": "bandai_spirits",
+        "name": "Memorable Saga",
+        "aliases": [
+          "メモラブルサーガ"
+        ]
+      },
+      {
+        "code": "spiritflicks",
+        "maker": "bandai_spirits",
+        "name": "SPIRITFLICKS",
+        "aliases": [
+          "スピリットフリックス"
+        ]
+      },
+      {
+        "code": "banpresto_figure",
+        "maker": "bandai_spirits",
+        "name": "BANPRESTO FIGURE",
+        "aliases": [
+          "バンプレストフィギュア"
+        ]
+      },
+      {
+        "code": "brc",
+        "maker": "bandai_spirits",
+        "name": "BATTLE RECORD COLLECTION",
+        "aliases": [
+          "バトルレコードコレクション"
+        ]
+      },
+      {
+        "code": "glitter_glamours",
+        "maker": "bandai_spirits",
+        "name": "GLITTER&GLAMOURS",
+        "aliases": [
+          "グリッターアンドグラマラス"
+        ]
+      },
+      {
+        "code": "glasscape",
+        "maker": "bandai_spirits",
+        "name": "Glasscape",
+        "aliases": [
+          "グラスケープ"
+        ]
+      },
+      {
+        "code": "espresto",
+        "maker": "bandai_spirits",
+        "name": "ESPRESTO",
+        "aliases": [
+          "エスプレスト"
+        ]
+      },
+      {
+        "code": "sofvimates",
+        "maker": "bandai_spirits",
+        "name": "SOFVIMATES",
+        "aliases": [
+          "ソフビメイツ"
+        ]
+      },
+      {
+        "code": "banpre_kuji",
+        "maker": "bandai_spirits",
+        "name": "バンプレくじ",
+        "aliases": [
+          "バンプレくじ",
+          "バンプレストくじ"
+        ]
+      },
+      {
+        "code": "naruto72",
+        "maker": "bandai_spirits",
+        "name": "NARUTO 72 series",
+        "aliases": [
+          "NARUTO72"
+        ]
+      },
+      {
+        "code": "noodle_stopper",
+        "maker": "furyu",
+        "name": "ぬーどるストッパーフィギュア",
+        "aliases": [
+          "ヌードルストッパー",
+          "ぬーどるすとっぱー"
+        ]
+      },
+      {
+        "code": "bicute_bunnies",
+        "maker": "furyu",
+        "name": "BiCute Bunnies",
+        "aliases": [
+          "ビキュートバニーズ"
+        ]
+      },
+      {
+        "code": "bicute_dark",
+        "maker": "furyu",
+        "name": "BiCute Dark",
+        "aliases": [
+          "ビキュートダーク"
+        ]
+      },
+      {
+        "code": "kurippy",
+        "maker": "furyu",
+        "name": "くりっぴぃ",
+        "aliases": [
+          "クリッピー"
+        ]
+      },
+      {
+        "code": "melffy",
+        "maker": "furyu",
+        "name": "melffy",
+        "aliases": [
+          "メルフィ"
+        ]
+      },
+      {
+        "code": "tenitol",
+        "maker": "furyu",
+        "name": "TENITOL",
+        "aliases": [
+          "テニトル"
+        ]
+      },
+      {
+        "code": "luminasta",
+        "maker": "sega_fave",
+        "name": "Luminasta",
+        "aliases": [
+          "ルミナスタ"
+        ]
+      },
+      {
+        "code": "spm",
+        "maker": "sega_fave",
+        "name": "SPM（スーパープレミアムフィギュア）",
+        "aliases": [
+          "スーパープレミアムフィギュア",
+          "SPM"
+        ]
+      },
+      {
+        "code": "yumemirize",
+        "maker": "sega_fave",
+        "name": "Yumemirize",
+        "aliases": [
+          "ユメミライズ"
+        ]
+      },
+      {
+        "code": "desktop_x2",
+        "maker": "sega_fave",
+        "name": "Desktop×Desktop",
+        "aliases": [
+          "デスクトップ"
+        ]
+      },
+      {
+        "code": "desktop_cute",
+        "maker": "taito",
+        "name": "Desktop Cute",
+        "aliases": [
+          "デスクトップキュート"
+        ]
+      },
+      {
+        "code": "amp_plus",
+        "maker": "taito",
+        "name": "AMP＋",
+        "aliases": [
+          "アンプラス"
+        ]
+      }
+    ],
+    "ip_work": [
+      {
+        "code": "kimetsu",
+        "title_jp": "鬼滅の刃",
+        "title_en": "Demon Slayer",
+        "title_zh": "鬼滅之刃",
+        "aliases": [
+          "鬼滅の刃",
+          "Kimetsu"
+        ]
+      },
+      {
+        "code": "one_piece",
+        "title_jp": "ONE PIECE",
+        "title_en": "One Piece",
+        "title_zh": "海賊王",
+        "aliases": [
+          "ワンピース",
+          "ONE PIECE",
+          "海賊王"
+        ]
+      },
+      {
+        "code": "jujutsu",
+        "title_jp": "呪術廻戦",
+        "title_en": "Jujutsu Kaisen",
+        "title_zh": "咒術迴戰",
+        "aliases": [
+          "呪術廻戦",
+          "呪術"
+        ]
+      },
+      {
+        "code": "dragon_ball",
+        "title_jp": "ドラゴンボール",
+        "title_en": "Dragon Ball",
+        "title_zh": "龍珠",
+        "aliases": [
+          "ドラゴンボール シリーズ",
+          "ドラゴンボール",
+          "DRAGON BALL",
+          "龍珠"
+        ]
+      },
+      {
+        "code": "naruto",
+        "title_jp": "NARUTO-ナルト- 疾風伝",
+        "title_en": "Naruto Shippuden",
+        "title_zh": "火影忍者",
+        "aliases": [
+          "NARUTO-ナルト- 疾風伝",
+          "NARUTO",
+          "ナルト",
+          "火影忍者"
+        ]
+      },
+      {
+        "code": "chiikawa",
+        "title_jp": "ちいかわ",
+        "title_en": "Chiikawa",
+        "title_zh": "吉伊卡哇",
+        "aliases": [
+          "ちいかわ"
+        ]
+      },
+      {
+        "code": "sanrio",
+        "title_jp": "サンリオキャラクターズ",
+        "title_en": "Sanrio Characters",
+        "title_zh": "Sanrio",
+        "aliases": [
+          "サンリオキャラクターズ",
+          "サンリオ"
+        ]
+      },
+      {
+        "code": "blue_archive",
+        "title_jp": "ブルーアーカイブ",
+        "title_en": "Blue Archive",
+        "title_zh": "蔚藍檔案",
+        "aliases": [
+          "ブルーアーカイブ"
+        ]
+      },
+      {
+        "code": "uma_musume",
+        "title_jp": "ウマ娘 プリティーダービー",
+        "title_en": "Uma Musume",
+        "title_zh": "賽馬娘",
+        "aliases": [
+          "ウマ娘"
+        ]
+      },
+      {
+        "code": "touhou",
+        "title_jp": "東方Project",
+        "title_en": "Touhou Project",
+        "title_zh": "東方Project",
+        "aliases": [
+          "東方Project",
+          "東方"
+        ]
+      },
+      {
+        "code": "evangelion",
+        "title_jp": "ヱヴァンゲリヲン新劇場版",
+        "title_en": "Evangelion",
+        "title_zh": "新世紀福音戰士",
+        "aliases": [
+          "ヱヴァンゲリヲン"
+        ]
+      },
+      {
+        "code": "k_on",
+        "title_jp": "けいおん！",
+        "title_en": "K-On!",
+        "title_zh": "K-ON！",
+        "aliases": [
+          "けいおん！",
+          "けいおん",
+          "K-ON!"
+        ]
+      },
+      {
+        "code": "zootopia",
+        "title_jp": "ズートピア",
+        "title_en": "Zootopia",
+        "title_zh": "優獸大都會",
+        "aliases": [
+          "ズートピア"
+        ]
+      },
+      {
+        "code": "minecraft",
+        "title_jp": "マインクラフト",
+        "title_en": "Minecraft",
+        "title_zh": "Minecraft",
+        "aliases": [
+          "マインクラフト",
+          "Minecraft"
+        ]
+      },
+      {
+        "code": "toy_story",
+        "title_jp": "トイ・ストーリー",
+        "title_en": "Toy Story",
+        "title_zh": "反斗奇兵",
+        "aliases": [
+          "トイ・ストーリー"
+        ]
+      },
+      {
+        "code": "kingdom",
+        "title_jp": "キングダム",
+        "title_en": "Kingdom",
+        "title_zh": "王者天下",
+        "aliases": [
+          "キングダム"
+        ]
+      },
+      {
+        "code": "hunter",
+        "title_jp": "HUNTER×HUNTER",
+        "title_en": "Hunter x Hunter",
+        "title_zh": "全職獵人",
+        "aliases": [
+          "HUNTER×HUNTER"
+        ]
+      },
+      {
+        "code": "overlord",
+        "title_jp": "オーバーロード",
+        "title_en": "Overlord",
+        "title_zh": "Overlord",
+        "aliases": [
+          "オーバーロード"
+        ]
+      },
+      {
+        "code": "lycoris",
+        "title_jp": "リコリス・リコイル",
+        "title_en": "Lycoris Recoil",
+        "title_zh": "Lycoris Recoil",
+        "aliases": [
+          "リコリス・リコイル"
+        ]
+      },
+      {
+        "code": "dandadan",
+        "title_jp": "ダンダダン",
+        "title_en": "Dandadan",
+        "title_zh": "Dandadan",
+        "aliases": [
+          "ダンダダン"
+        ]
+      },
+      {
+        "code": "kamen_rider",
+        "title_jp": "仮面ライダー",
+        "title_en": "Kamen Rider",
+        "title_zh": "幪面超人",
+        "aliases": [
+          "仮面ライダー"
+        ]
+      },
+      {
+        "code": "ultraman",
+        "title_jp": "ウルトラマンシリーズ",
+        "title_en": "Ultraman",
+        "title_zh": "超人",
+        "aliases": [
+          "ウルトラマン"
+        ]
+      },
+      {
+        "code": "irodori",
+        "title_jp": "いちご100％",
+        "title_en": "Strawberry 100%",
+        "title_zh": "草莓100%",
+        "aliases": [
+          "いちご100％",
+          "いちご100%"
+        ]
+      },
+      {
+        "code": "to_love_ru",
+        "title_jp": "To LOVEる",
+        "title_en": "To Love-Ru",
+        "title_zh": "出包王女",
+        "aliases": [
+          "To LOVEる ダークネス",
+          "To LOVEる",
+          "出包王女"
+        ]
+      },
+      {
+        "code": "kisekoi",
+        "title_jp": "その着せ替え人形は恋をする",
+        "title_en": "My Dress-Up Darling",
+        "title_zh": "戀上換裝娃娃",
+        "aliases": [
+          "その着せ替え人形は恋をする",
+          "着せ恋",
+          "戀上換裝娃娃"
+        ]
+      },
+      {
+        "code": "blue_lock",
+        "title_jp": "ブルーロック",
+        "title_en": "Blue Lock",
+        "title_zh": "藍色監獄",
+        "aliases": [
+          "ブルーロック"
+        ]
+      },
+      {
+        "code": "doraemon",
+        "title_jp": "ドラえもん",
+        "title_en": "Doraemon",
+        "title_zh": "多啦A夢",
+        "aliases": [
+          "ドラえもん"
+        ]
+      },
+      {
+        "code": "pokemon",
+        "title_jp": "ポケットモンスター",
+        "title_en": "Pokemon",
+        "title_zh": "寵物小精靈",
+        "aliases": [
+          "ポケモンモンスターシリーズ",
+          "ポケットモンスター",
+          "ポケモン",
+          "Pokemon"
+        ]
+      },
+      {
+        "code": "precure",
+        "title_jp": "プリキュア",
+        "title_en": "Precure",
+        "title_zh": "光之美少女",
+        "aliases": [
+          "プリキュア"
+        ]
+      },
+      {
+        "code": "one_punch",
+        "title_jp": "ワンパンマン",
+        "title_en": "One Punch Man",
+        "title_zh": "一拳超人",
+        "aliases": [
+          "ワンパンマン"
+        ]
+      },
+      {
+        "code": "kusuriya",
+        "title_jp": "薬屋のひとりごと",
+        "title_en": "Apothecary Diaries",
+        "title_zh": "藥屋少女的呢喃",
+        "aliases": [
+          "薬屋のひとりごと",
+          "薬屋"
+        ]
+      },
+      {
+        "code": "baki",
+        "title_jp": "刃牙",
+        "title_en": "Baki",
+        "title_zh": "刃牙",
+        "aliases": [
+          "刃牙"
+        ]
+      },
+      {
+        "code": "kochikame",
+        "title_jp": "こちら葛飾区亀有公園前派出所",
+        "title_en": "Kochikame",
+        "title_zh": "烏龍派出所",
+        "aliases": [
+          "こちら葛飾区亀有公園前派出所",
+          "こち亀"
+        ]
+      },
+      {
+        "code": "thoroughbred",
+        "title_jp": "サラブレッドコレクション",
+        "title_en": "Thoroughbred Collection",
+        "title_zh": "賽馬收藏",
+        "aliases": [
+          "サラブレッドコレクション"
+        ]
+      },
+      {
+        "code": "chainsaw_man",
+        "title_jp": "チェンソーマン",
+        "title_en": "Chainsaw Man",
+        "title_zh": "電鋸人",
+        "aliases": [
+          "チェンソーマン"
+        ]
+      },
+      {
+        "code": "gakuen_idolmaster",
+        "title_jp": "学園アイドルマスター",
+        "title_en": "Gakuen Idolmaster",
+        "title_zh": "學園偶像大師",
+        "aliases": [
+          "学園アイドルマスター",
+          "学マス"
+        ]
+      },
+      {
+        "code": "star_kirby",
+        "title_jp": "星のカービィ",
+        "title_en": "Kirby",
+        "title_zh": "星之卡比",
+        "aliases": [
+          "星のカービィ",
+          "カービィ"
+        ]
+      },
+      {
+        "code": "suzumiya",
+        "title_jp": "涼宮ハルヒの憂鬱",
+        "title_en": "Haruhi Suzumiya",
+        "title_zh": "涼宮春日的憂鬱",
+        "aliases": [
+          "涼宮ハルヒの憂鬱",
+          "涼宮ハルヒ"
+        ]
+      },
+      {
+        "code": "hokuto",
+        "title_jp": "北斗の拳",
+        "title_en": "Fist of the North Star",
+        "title_zh": "北斗之拳",
+        "aliases": [
+          "北斗の拳",
+          "FIST OF THE NORTH STAR"
+        ]
+      },
+      {
+        "code": "gundam_seed",
+        "title_jp": "機動戦士ガンダムSEED",
+        "title_en": "Gundam SEED",
+        "title_zh": "機動戰士高達SEED",
+        "aliases": [
+          "機動戦士ガンダムSEED",
+          "ガンダムSEED"
+        ]
+      },
+      {
+        "code": "needy_girl",
+        "title_jp": "NEEDY GIRL OVERDOSE",
+        "title_en": "Needy Girl Overdose",
+        "title_zh": "主播女孩重度依賴",
+        "aliases": [
+          "NEEDY GIRL OVERDOSE",
+          "NEEDY STREAMER OVERLOAD"
+        ]
+      },
+      {
+        "code": "lovot",
+        "title_jp": "LOVOT",
+        "title_en": "LOVOT",
+        "title_zh": "LOVOT",
+        "aliases": [
+          "LOVOT"
+        ]
+      },
+      {
+        "code": "nyanko",
+        "title_jp": "にゃんこ大戦争",
+        "title_en": "Battle Cats",
+        "title_zh": "貓咪大戰爭",
+        "aliases": [
+          "にゃんこ大戦争"
+        ]
+      },
+      {
+        "code": "shingeki",
+        "title_jp": "進撃の巨人",
+        "title_en": "Attack on Titan",
+        "title_zh": "進擊的巨人",
+        "aliases": [
+          "進撃の巨人"
+        ]
+      },
+      {
+        "code": "toaru",
+        "title_jp": "とある科学の超電磁砲",
+        "title_en": "A Certain Scientific Railgun",
+        "title_zh": "科學超電磁砲",
+        "aliases": [
+          "とある科学の超電磁砲T",
+          "とある科学の超電磁砲"
+        ]
+      },
+      {
+        "code": "saki",
+        "title_jp": "咲-Saki-",
+        "title_en": "Saki",
+        "title_zh": "咲-Saki-",
+        "aliases": [
+          "咲-Saki-"
+        ]
+      },
+      {
+        "code": "tensura",
+        "title_jp": "転生したらスライムだった件",
+        "title_en": "That Time I Got Reincarnated as a Slime",
+        "title_zh": "關於我轉生變成史萊姆這檔事",
+        "aliases": [
+          "転生したらスライムだった件",
+          "転スラ"
+        ]
+      },
+      {
+        "code": "kingdom_hearts",
+        "title_jp": "KINGDOM HEARTS",
+        "title_en": "Kingdom Hearts",
+        "title_zh": "王國之心",
+        "aliases": [
+          "KINGDOM HEARTS"
+        ]
+      },
+      {
+        "code": "frieren",
+        "title_jp": "葬送のフリーレン",
+        "title_en": "Frieren",
+        "title_zh": "葬送的芙莉蓮",
+        "aliases": [
+          "フリーレン",
+          "葬送のフリーレン"
+        ]
+      },
+      {
+        "code": "oshi_no_ko",
+        "title_jp": "【推しの子】",
+        "title_en": "Oshi no Ko",
+        "title_zh": "我推的孩子",
+        "aliases": [
+          "推しの子",
+          "オシのコ"
+        ]
+      },
+      {
+        "code": "spy_family",
+        "title_jp": "SPY×FAMILY",
+        "title_en": "Spy x Family",
+        "title_zh": "間諜家家酒",
+        "aliases": [
+          "スパイファミリー",
+          "スパイ×ファミリー",
+          "アーニャ"
+        ]
+      },
+      {
+        "code": "tokyo_revengers",
+        "title_jp": "東京リベンジャーズ",
+        "title_en": "Tokyo Revengers",
+        "title_zh": "東京復仇者",
+        "aliases": [
+          "東リベ",
+          "東京リベンジャー"
+        ]
+      },
+      {
+        "code": "haikyu",
+        "title_jp": "ハイキュー!!",
+        "title_en": "Haikyu!!",
+        "title_zh": "排球少年",
+        "aliases": [
+          "ハイキュー",
+          "排球"
+        ]
+      },
+      {
+        "code": "heroaca",
+        "title_jp": "僕のヒーローアカデミア",
+        "title_en": "My Hero Academia",
+        "title_zh": "我的英雄學院",
+        "aliases": [
+          "ヒロアカ",
+          "僕のヒーロー"
+        ]
+      },
+      {
+        "code": "bleach",
+        "title_jp": "BLEACH",
+        "title_en": "Bleach",
+        "title_zh": "死神",
+        "aliases": [
+          "ブリーチ"
+        ]
+      },
+      {
+        "code": "gintama",
+        "title_jp": "銀魂",
+        "title_en": "Gintama",
+        "title_zh": "銀魂",
+        "aliases": [
+          "銀魂"
+        ]
+      },
+      {
+        "code": "hololive",
+        "title_jp": "ホロライブ",
+        "title_en": "Hololive",
+        "title_zh": "hololive",
+        "aliases": [
+          "ホロ",
+          "hololive"
+        ]
+      },
+      {
+        "code": "nijisanji",
+        "title_jp": "にじさんじ",
+        "title_en": "Nijisanji",
+        "title_zh": "彩虹社",
+        "aliases": [
+          "にじさんじ"
+        ]
+      },
+      {
+        "code": "lovelive",
+        "title_jp": "ラブライブ！",
+        "title_en": "Love Live!",
+        "title_zh": "LoveLive!",
+        "aliases": [
+          "ラブライブ",
+          "LoveLive"
+        ]
+      },
+      {
+        "code": "idolmaster",
+        "title_jp": "アイドルマスター",
+        "title_en": "The Idolmaster",
+        "title_zh": "偶像大師",
+        "aliases": [
+          "アイマス",
+          "デレステ",
+          "シャニマス",
+          "ミリオンライブ"
+        ]
+      },
+      {
+        "code": "utapri",
+        "title_jp": "うたの☆プリンスさまっ♪",
+        "title_en": "Uta no Prince-sama",
+        "title_zh": "歌之王子殿下",
+        "aliases": [
+          "うたプリ"
+        ]
+      },
+      {
+        "code": "sumikko",
+        "title_jp": "すみっコぐらし",
+        "title_en": "Sumikko Gurashi",
+        "title_zh": "角落小夥伴",
+        "aliases": [
+          "すみっコ",
+          "すみっこぐらし",
+          "角落生物"
+        ]
+      },
+      {
+        "code": "opanchu",
+        "title_jp": "おぱんちゅうさぎ",
+        "title_en": "Opanchu Usagi",
+        "title_zh": "內褲兔",
+        "aliases": [
+          "おぱんちゅ"
+        ]
+      },
+      {
+        "code": "mofusand",
+        "title_jp": "mofusand",
+        "title_en": "mofusand",
+        "title_zh": "mofusand",
+        "aliases": [
+          "モフサンド",
+          "モフサンド"
+        ]
+      },
+      {
+        "code": "kaiju_no8",
+        "title_jp": "怪獣8号",
+        "title_en": "Kaiju No. 8",
+        "title_zh": "怪獸8號",
+        "aliases": [
+          "怪獣８号",
+          "怪獣8"
+        ]
+      },
+      {
+        "code": "dungeon_meshi",
+        "title_jp": "ダンジョン飯",
+        "title_en": "Delicious in Dungeon",
+        "title_zh": "迷宮飯",
+        "aliases": [
+          "ダンジョン飯",
+          "ダンジョンめし"
+        ]
+      },
+      {
+        "code": "ranma",
+        "title_jp": "らんま1/2",
+        "title_en": "Ranma 1/2",
+        "title_zh": "亂馬1/2",
+        "aliases": [
+          "らんま",
+          "らんま½"
+        ]
+      },
+      {
+        "code": "urusei",
+        "title_jp": "うる星やつら",
+        "title_en": "Urusei Yatsura",
+        "title_zh": "福星小子",
+        "aliases": [
+          "うる星"
+        ]
+      },
+      {
+        "code": "inuyasha",
+        "title_jp": "犬夜叉",
+        "title_en": "Inuyasha",
+        "title_zh": "犬夜叉",
+        "aliases": [
+          "犬夜叉"
+        ]
+      },
+      {
+        "code": "jojo",
+        "title_jp": "ジョジョの奇妙な冒険",
+        "title_en": "JoJo's Bizarre Adventure",
+        "title_zh": "JOJO的奇妙冒險",
+        "aliases": [
+          "ジョジョ",
+          "JOJO"
+        ]
+      },
+      {
+        "code": "fate",
+        "title_jp": "Fate/Grand Order",
+        "title_en": "Fate/Grand Order",
+        "title_zh": "FGO",
+        "aliases": [
+          "FGO",
+          "フェイト",
+          "Fate"
+        ]
+      },
+      {
+        "code": "monster_hunter",
+        "title_jp": "モンスターハンター",
+        "title_en": "Monster Hunter",
+        "title_zh": "魔物獵人",
+        "aliases": [
+          "モンハン"
+        ]
+      },
+      {
+        "code": "zelda",
+        "title_jp": "ゼルダの伝説",
+        "title_en": "The Legend of Zelda",
+        "title_zh": "薩爾達傳說",
+        "aliases": [
+          "ゼルダ"
+        ]
+      },
+      {
+        "code": "mario",
+        "title_jp": "スーパーマリオ",
+        "title_en": "Super Mario",
+        "title_zh": "超級瑪利歐",
+        "aliases": [
+          "マリオ"
+        ]
+      },
+      {
+        "code": "dragon_quest",
+        "title_jp": "ドラゴンクエスト",
+        "title_en": "Dragon Quest",
+        "title_zh": "勇者鬥惡龍",
+        "aliases": [
+          "ドラクエ",
+          "DQ"
+        ]
+      },
+      {
+        "code": "disney_tsum",
+        "title_jp": "ディズニーツムツム",
+        "title_en": "Disney Tsum Tsum",
+        "title_zh": "Tsum Tsum",
+        "aliases": [
+          "ツムツム"
+        ]
+      },
+      {
+        "code": "detective_conan",
+        "title_jp": "名探偵コナン",
+        "title_en": "Detective Conan",
+        "title_zh": "名偵探柯南",
+        "aliases": [
+          "コナン"
+        ]
+      },
+      {
+        "code": "shinchan",
+        "title_jp": "クレヨンしんちゃん",
+        "title_en": "Crayon Shin-chan",
+        "title_zh": "蠟筆小新",
+        "aliases": [
+          "しんちゃん"
+        ]
+      },
+      {
+        "code": "sazae",
+        "title_jp": "サザエさん",
+        "title_en": "Sazae-san",
+        "title_zh": "海螺小姐",
+        "aliases": [
+          "サザエ"
+        ]
+      },
+      {
+        "code": "chibimaruko",
+        "title_jp": "ちびまる子ちゃん",
+        "title_en": "Chibi Maruko-chan",
+        "title_zh": "櫻桃小丸子",
+        "aliases": [
+          "まる子"
+        ]
+      },
+      {
+        "code": "slamdunk",
+        "title_jp": "SLAM DUNK",
+        "title_en": "Slam Dunk",
+        "title_zh": "灌籃高手",
+        "aliases": [
+          "スラムダンク"
+        ]
+      },
+      {
+        "code": "gundam",
+        "title_jp": "機動戦士ガンダム",
+        "title_en": "Mobile Suit Gundam",
+        "title_zh": "機動戰士高達",
+        "aliases": [
+          "ガンダム"
+        ]
+      },
+      {
+        "code": "sailor_moon",
+        "title_jp": "美少女戦士セーラームーン",
+        "title_en": "Sailor Moon",
+        "title_zh": "美少女戰士",
+        "aliases": [
+          "セーラームーン"
+        ]
+      },
+      {
+        "code": "cardcaptor",
+        "title_jp": "カードキャプターさくら",
+        "title_en": "Cardcaptor Sakura",
+        "title_zh": "庫洛魔法使",
+        "aliases": [
+          "さくら"
+        ]
+      },
+      {
+        "code": "arknights",
+        "title_jp": "アークナイツ",
+        "title_en": "Arknights",
+        "title_zh": "明日方舟",
+        "aliases": [
+          "アークナイツ",
+          "明日方舟"
+        ]
+      },
+      {
+        "code": "ao_no_hako",
+        "title_jp": "アオのハコ",
+        "title_en": "Blue Box",
+        "title_zh": "青之蘆葦",
+        "aliases": [
+          "アオのハコ"
+        ]
+      },
+      {
+        "code": "seishun_buta",
+        "title_jp": "青春ブタ野郎シリーズ",
+        "title_en": "Rascal Does Not Dream",
+        "title_zh": "青春豬頭少年",
+        "aliases": [
+          "青ブタ",
+          "青春ブタ"
+        ]
+      },
+      {
+        "code": "sadako",
+        "title_jp": "貞子",
+        "title_en": "Sadako",
+        "title_zh": "貞子",
+        "aliases": [
+          "貞子"
+        ]
+      },
+      {
+        "code": "nikke",
+        "title_jp": "勝利の女神NIKKE",
+        "title_en": "Goddess of Victory: Nikke",
+        "title_zh": "勝利女神",
+        "aliases": [
+          "NIKKE"
+        ]
+      },
+      {
+        "code": "fairytail",
+        "title_jp": "FAIRY TAIL",
+        "title_en": "Fairy Tail",
+        "title_zh": "妖精的尾巴",
+        "aliases": [
+          "フェアリーテイル"
+        ]
+      },
+      {
+        "code": "moomin",
+        "title_jp": "ムーミン",
+        "title_en": "Moomin",
+        "title_zh": "姆明",
+        "aliases": [
+          "ムーミン"
+        ]
+      },
+      {
+        "code": "kagurabachi",
+        "title_jp": "カグラバチ",
+        "title_en": "Kagurabachi",
+        "title_zh": "神樂鉢",
+        "aliases": [
+          "カグラバチ"
+        ]
+      },
+      {
+        "code": "ouran",
+        "title_jp": "桜蘭高校ホスト部",
+        "title_en": "Ouran High School Host Club",
+        "title_zh": "櫻蘭高校男公關部",
+        "aliases": [
+          "桜蘭"
+        ]
+      },
+      {
+        "code": "obungu",
+        "title_jp": "お文具といっしょ",
+        "title_en": "Obungu to Issho",
+        "title_zh": "與文具在一起",
+        "aliases": [
+          "お文具"
+        ]
+      },
+      {
+        "code": "made_in_abyss",
+        "title_jp": "メイドインアビス",
+        "title_en": "Made in Abyss",
+        "title_zh": "來自深淵",
+        "aliases": [
+          "メイドインアビス"
+        ]
+      },
+      {
+        "code": "kuma_pooh",
+        "title_jp": "くまのプーさん",
+        "title_en": "Winnie the Pooh",
+        "title_zh": "小熊維尼",
+        "aliases": [
+          "プーさん"
+        ]
+      },
+      {
+        "code": "monsters_inc",
+        "title_jp": "モンスターズ・インク",
+        "title_en": "Monsters, Inc.",
+        "title_zh": "怪獸公司",
+        "aliases": [
+          "モンスターズインク"
+        ]
+      },
+      {
+        "code": "coco",
+        "title_jp": "リメンバー・ミー",
+        "title_en": "Coco",
+        "title_zh": "玩轉極樂園",
+        "aliases": [
+          "リメンバーミー"
+        ]
+      },
+      {
+        "code": "glay",
+        "title_jp": "GLAY",
+        "title_en": "GLAY",
+        "title_zh": "GLAY",
+        "aliases": [
+          "GLAY"
+        ]
+      },
+      {
+        "code": "xstellar",
+        "title_jp": "XStellar",
+        "title_en": "XStellar",
+        "title_zh": "XStellar",
+        "aliases": [
+          "XStellar"
+        ]
+      }
+    ],
+    "category": [
+      {
+        "code": "figure",
+        "label_zh": "人形手辦",
+        "label_jp": "フィギュア"
+      },
+      {
+        "code": "plush",
+        "label_zh": "毛絨公仔",
+        "label_jp": "ぬいぐるみ"
+      },
+      {
+        "code": "mascot",
+        "label_zh": "吉祥物小物",
+        "label_jp": "マスコット"
+      },
+      {
+        "code": "goods",
+        "label_zh": "雜貨",
+        "label_jp": "雑貨・グッズ"
+      },
+      {
+        "code": "cushion",
+        "label_zh": "攬枕",
+        "label_jp": "クッション"
+      },
+      {
+        "code": "towel",
+        "label_zh": "毛巾",
+        "label_jp": "タオル"
+      },
+      {
+        "code": "tableware",
+        "label_zh": "食器",
+        "label_jp": "食器"
+      },
+      {
+        "code": "lamp",
+        "label_zh": "燈飾",
+        "label_jp": "ランプ"
+      },
+      {
+        "code": "acrylic_stand",
+        "label_zh": "亞克力立牌",
+        "label_jp": "アクリルスタンド"
+      },
+      {
+        "code": "colored_paper",
+        "label_zh": "色紙",
+        "label_jp": "色紙"
+      },
+      {
+        "code": "keychain",
+        "label_zh": "掛飾／鑰匙扣",
+        "label_jp": "キーホルダー"
+      },
+      {
+        "code": "other",
+        "label_zh": "其他",
+        "label_jp": "その他"
+      }
+    ],
+    "prize_tier": [
+      {
+        "code": "A",
+        "label_jp": "A賞",
+        "label_zh": "A賞"
+      },
+      {
+        "code": "B",
+        "label_jp": "B賞",
+        "label_zh": "B賞"
+      },
+      {
+        "code": "C",
+        "label_jp": "C賞",
+        "label_zh": "C賞"
+      },
+      {
+        "code": "D",
+        "label_jp": "D賞",
+        "label_zh": "D賞"
+      },
+      {
+        "code": "E",
+        "label_jp": "E賞",
+        "label_zh": "E賞"
+      },
+      {
+        "code": "last_one",
+        "label_jp": "ラストワン賞",
+        "label_zh": "尾賞",
+        "aliases": [
+          "尾賞",
+          "最終賞",
+          "ラストワン"
+        ]
+      }
+    ],
+    "size_bucket": [
+      {
+        "cm": 10,
+        "label": "約10cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 15,
+        "label": "約15cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 20,
+        "label": "約20cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 25,
+        "label": "約25cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 30,
+        "label": "約30cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 35,
+        "label": "約35cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      },
+      {
+        "cm": 40,
+        "label": "約40cm",
+        "rule": "5cm 桶（DB round(size/5)*5）"
+      }
+    ],
+    "release_month": {
+      "type": "month",
+      "format": "YYYY-MM",
+      "note": "由 item.release_month 派生，唔寫死清單"
+    },
+    "condition": [
+      {
+        "code": "new",
+        "label_zh": "全新"
+      },
+      {
+        "code": "unopened",
+        "label_zh": "未拆"
+      },
+      {
+        "code": "opened",
+        "label_zh": "僅拆"
+      },
+      {
+        "code": "flawed",
+        "label_zh": "有瑕疵"
+      }
+    ],
+    "price_range": {
+      "currency": "JPY",
+      "note": "第一階段只日圓，不做港元換算"
+    }
+  },
+  "rules": {
+    "size_bucket_rule": "round(size_cm / 5) * 5",
+    "series_group_format": "純阿拉伯數字字串，例如 '2'（Ⅱ→2、03→3）",
+    "official_name_only": "只有 official_name 可以做去重／比對；raw_title 只做溯源",
+    "kuji_model": "kuji 池（is_kuji_pool=true）→ 賞品（parent_item_id + prize_tier）",
+    "privacy": {
+      "search": "前端本地運算（mv_search_index 靜態 JSON）",
+      "server_logs": "冇 query_log / user_id / session",
+      "local_only": [
+        "瀏覽記錄",
+        "收藏",
+        "最近搜尋關鍵詞（localStorage）"
+      ]
+    }
+  },
+  "excluded": {
+    "makers": [
+      {
+        "name": "Namco（バンダイナムコアミューズメント）",
+        "reason": "機台營運商，唔係景品製造商"
+      },
+      {
+        "name": "Good Smile Company",
+        "reason": "scale figure／ねんどろいど，唔做夾機景品；加入會污染 prize 定位"
+      }
+    ],
+    "ip_work": [
+      {
+        "name": "原神",
+        "reason": "日本夾機景品幾乎冇（主要中國市場），加入會拉低篩選準確度"
+      },
+      {
+        "name": "崩壞：星穹鐵道",
+        "reason": "同上，非日本 prize 主流"
+      }
+    ],
+    "note": "明確排除，唔會出現喺 filters；改 aliases.py 後重生"
+  },
+  "decisions_pending": [
+    "排行榜數據來源（A: item_view_daily 聚合 / B: 外部訊號）",
+    "廠商清單：確認移走 Namco、Good Smile；TAKARA 放その他"
+  ]
+}

@@ -1,0 +1,8 @@
+﻿__pycache__/
+*.pyc
+*.log
+.wtool/
+.npm-cache/
+node_modules/
+corpus/*.jsonl
+dist/
