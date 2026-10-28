@@ -14,8 +14,7 @@ jobs:
         with:
           node-version: 22
       - name: Build dist
-        run: |
-          python web/demo/build_demo.py --items web/items.json || true
+        run: python web/demo/build_demo.py --items web/items.json || true
       - name: Deploy
         run: npx wrangler pages deploy web/demo/dist --project-name=prize-intel-beta --branch=main --commit-dirty=true
         env:
