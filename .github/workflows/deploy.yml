@@ -1,0 +1,23 @@
+﻿name: Deploy to Cloudflare Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build dist
+        run: |
+          python web/demo/build_demo.py --items web/items.json || true
+      - name: Deploy
+        run: npx wrangler pages deploy web/demo/dist --project-name=prize-intel-beta --branch=main --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,0 +1,14 @@
+﻿# 受保護檔案：改動需要 repo owner 審核
+web/demo/app.js            @leung200303-cloud
+web/items.json             @leung200303-cloud
+pipeline/                  @leung200303-cloud
+module1/                   @leung200303-cloud
+module2/                   @leung200303-cloud
+module3/                   @leung200303-cloud
+schema/                    @leung200303-cloud
+.github/                   @leung200303-cloud
+
+# UI 範圍（Manus 可以直接改，唔需要 owner review）
+web/demo/styles.css
+web/demo/index.html
+web/demo/config.json
